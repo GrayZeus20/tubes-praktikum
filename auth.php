@@ -7,12 +7,12 @@ $action = $_GET['action'] ?? '';
 switch ($action) {
     case 'login':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $stmt = $koneksi->prepare("SELECT * FROM admin WHERE username=? AND password=?");
-            $stmt->bind_param("ss", $_POST['username'], $_POST['password']);
+            $stmt = $koneksi->prepare("SELECT * FROM admin WHERE username=?");
+            $stmt->bind_param("s", $_POST['username']);
             $stmt->execute();
-            $found = $stmt->get_result()->num_rows > 0;
+            $row = $stmt->get_result()->fetch_assoc();
             $stmt->close();
-            if ($found) {
+            if ($row && password_verify($_POST['password'], $row['password'])) {
                 $_SESSION['username'] = $_POST['username'];
             } else {
                 $_SESSION['flash'] = 'Username atau password salah';
@@ -21,8 +21,9 @@ switch ($action) {
         break;
     case 'register':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $hash = password_hash($_POST['password'], PASSWORD_DEFAULT);
             $stmt = $koneksi->prepare("INSERT INTO admin (username, password) VALUES (?, ?)");
-            $stmt->bind_param("ss", $_POST['username'], $_POST['password']);
+            $stmt->bind_param("ss", $_POST['username'], $hash);
             if ($stmt->execute()) {
                 $_SESSION['username'] = $_POST['username'];
             } else {
