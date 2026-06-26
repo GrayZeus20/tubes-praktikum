@@ -319,7 +319,14 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
                     </div>
                     <div class="form-group">
                         <label>Password</label>
-                        <input type="password" name="password" class="form-control" required>
+                        <div class="input-group">
+                            <input type="password" name="password" class="form-control" id="loginPassword" required>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" id="toggleLoginPass" tabindex="-1">
+                                    <span id="loginEyeIcon">Tampilkan</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -415,6 +422,18 @@ $(document).ready(function() {
         $('.nav-item').removeClass('active');
         if (el) el.addClass('active');
     }
+
+    $('#toggleLoginPass').click(function() {
+        var input = $('#loginPassword');
+        var icon = $('#loginEyeIcon');
+        if (input.attr('type') === 'password') {
+            input.attr('type', 'text');
+            icon.text('Sembunyikan');
+        } else {
+            input.attr('type', 'password');
+            icon.text('Tampilkan');
+        }
+    });
 
     $('#homeLink').click(function(e) { e.preventDefault(); showSection('homeSection'); setActiveNav(null); });
     $('#profileLink').click(function(e) { e.preventDefault(); showSection('profileSection'); setActiveNav($(this)); });
