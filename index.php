@@ -107,7 +107,7 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
         html,body{height:100%;margin:0}
         body{display:flex;flex-direction:column;font-family:'Segoe UI',Arial,sans-serif;background:#f0f0f0}
         main{flex:1;padding-bottom:2rem}
-        footer{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);text-align:center;padding:1.2rem;color:rgba(255,255,255,.9);font-size:.9rem;width:100%}
+        footer{background:linear-gradient(135deg,#60A5FA 0%,#764ba2 100%);text-align:center;padding:1.2rem;color:rgba(255,255,255,.9);font-size:.9rem;width:100%}
         .pin.card{width:100%;max-width:300px;height:360px;overflow:hidden;transition:transform .2s}
         .pin.card:hover{transform:scale(1.03)}
         .pin img{width:100%;height:65%;object-fit:cover;cursor:pointer}
@@ -117,7 +117,7 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
         .favorite-btn.favorited{background:#e74c3c;color:#fff}
         .favorite-btn.favorited:hover{background:#c0392b;border-color:#c0392b}
         .btn-outline-danger.btn-sm{line-height:1;font-size:1.1rem}
-        header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)!important;box-shadow:0 4px 20px rgba(0,0,0,.15)!important}
+        header{background:linear-gradient(135deg,#60A5FA 0%,#764ba2 100%)!important;box-shadow:0 4px 20px rgba(0,0,0,.15)!important}
         .brand{color:#fff!important;text-decoration:none!important}
         .brand h3{margin:0;font-weight:700;letter-spacing:-.5px}
         .brand i{font-style:normal;background:rgba(255,255,255,.2);padding:4px 12px;border-radius:8px;backdrop-filter:blur(4px)}
