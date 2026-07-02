@@ -185,7 +185,7 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
 
 <header class="p-3 mb-4">
     <div class="container d-flex justify-content-between align-items-center">
-        <a href="#" id="homeLink" class="brand"><h3><i>Kelompok3</i></h3></a>
+        <a href="#" id="homeLink" class="brand"><h3><i>Kelompok 3</i></h3></a>
         <form action="index.php" method="get" class="search-bar">
             <input type="text" class="form-control" placeholder="Cari gambar..." name="cari" value="<?=htmlspecialchars($search)?>"/>
         </form>
