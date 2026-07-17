@@ -156,8 +156,9 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
         .auth-card-blur { backdrop-filter: blur(16px); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        @keyframes pulse-soft { 0%,100% { opacity: 0.3; } 50% { opacity: 0.5; } }
-        .animate-pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
+        .nav-active { border-bottom: 2px solid #0f172a; color: #0f172a !important; }
+        .hidden-section { display: none; }
+        .nav-link { transition: all 0.2s; }
     </style>
 </head>
 <body class="bg-surface text-on-surface font-sans antialiased selection:bg-primary/10 selection:text-primary">
@@ -165,14 +166,14 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
 <!-- Header -->
 <header class="fixed top-0 w-full h-16 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/30 z-50">
     <div class="flex items-center justify-between h-full px-4 md:px-margin-x max-w-container-max mx-auto">
-        <a href="#" id="homeLink" class="flex items-center gap-2">
+        <a href="#" id="homeLink" class="flex items-center gap-2 nav-link">
             <span class="material-symbols-outlined text-primary text-2xl">grid_view</span>
             <span class="font-bold text-lg text-primary hidden sm:inline">Kelompok 3 Gallery</span>
         </a>
         <div class="hidden md:flex items-center gap-6">
-            <a href="#" id="homeLink2" class="text-sm font-medium text-primary border-b-2 border-primary pb-0.5">Explore</a>
-            <a href="#" id="favoriteLinkNav" class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors">Favorites</a>
-            <a href="#" id="profileLinkNav" class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors">Profile</a>
+            <a href="#" id="homeLink2" class="text-sm font-medium text-primary border-b-2 border-primary pb-0.5 nav-link">Explore</a>
+            <a href="#" id="favoriteLinkNav" class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors nav-link">Favorites</a>
+            <a href="#" id="profileLinkNav" class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors nav-link">Profile</a>
         </div>
         <div class="flex items-center gap-3">
             <form action="index.php" method="get" class="relative hidden sm:block">
@@ -180,7 +181,6 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
                 <input type="text" name="cari" value="<?=htmlspecialchars($search)?>" placeholder="Search..." class="h-9 pl-9 pr-3 text-sm bg-surface-container-low border-none rounded-full focus:ring-2 focus:ring-primary/30 w-48 lg:w-64 transition-all"/>
             </form>
             <?php if ($username): ?>
-                <span class="hidden sm:block text-sm text-on-surface-variant"><?=htmlspecialchars($username)?></span>
                 <button id="newLink" class="flex items-center justify-center w-9 h-9 rounded-full bg-primary text-white hover:opacity-90 transition-opacity">
                     <span class="material-symbols-outlined text-lg">add</span>
                 </button>
@@ -373,7 +373,10 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
                     <label class="block text-sm font-medium text-on-surface mb-1">Password</label>
                     <div class="relative">
                         <input type="password" name="password" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" id="loginPassword" required>
-                        <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-on-surface-variant hover:text-primary" onclick="togglePassword('loginPassword', this)">Show</button>
+                        <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors" onclick="togglePassword('loginPassword', this)">
+                            <svg class="w-5 h-5 show-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            <svg class="w-5 h-5 hide-icon hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                        </button>
                     </div>
                 </div>
                 <button type="submit" class="w-full h-10 bg-primary text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">Sign In</button>
@@ -403,7 +406,13 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-on-surface mb-1">Password</label>
-                    <input type="password" name="password" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" required>
+                    <div class="relative">
+                        <input type="password" name="password" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" id="registerPassword" required>
+                        <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors" onclick="togglePassword('registerPassword', this)">
+                            <svg class="w-5 h-5 show-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            <svg class="w-5 h-5 hide-icon hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                        </button>
+                    </div>
                 </div>
                 <button type="submit" class="w-full h-10 bg-primary text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">Register</button>
             </form>
@@ -483,11 +492,20 @@ function setActiveMobile(el) {
 function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-// Password toggle
+// Password toggle with SVG icons
 function togglePassword(inputId, btn) {
     var input = document.getElementById(inputId);
-    if (input.type === 'password') { input.type = 'text'; btn.textContent = 'Hide'; }
-    else { input.type = 'password'; btn.textContent = 'Show'; }
+    var showIcon = btn.querySelector('.show-icon');
+    var hideIcon = btn.querySelector('.hide-icon');
+    if (input.type === 'password') {
+        input.type = 'text';
+        showIcon.classList.add('hidden');
+        hideIcon.classList.remove('hidden');
+    } else {
+        input.type = 'password';
+        showIcon.classList.remove('hidden');
+        hideIcon.classList.add('hidden');
+    }
 }
 
 // Image preview
@@ -515,16 +533,55 @@ window.addEventListener('scroll', function() {
 });
 scrollBtn.addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
-// Nav clicks
-document.getElementById('homeLink').addEventListener('click', function(e) { e.preventDefault(); showSection('homeSection'); setActiveMobile(document.getElementById('navHome')); });
-if (document.getElementById('homeLink2')) document.getElementById('homeLink2').addEventListener('click', function(e) { e.preventDefault(); showSection('homeSection'); });
-if (document.getElementById('profileLinkNav')) document.getElementById('profileLinkNav').addEventListener('click', function(e) { e.preventDefault(); showSection('profileSection'); });
-if (document.getElementById('favoriteLinkNav')) document.getElementById('favoriteLinkNav').addEventListener('click', function(e) { e.preventDefault(); showSection('favoriteSection'); });
-document.getElementById('navProfile')?.addEventListener('click', function(e) { e.preventDefault(); showSection('profileSection'); });
-document.getElementById('navFavorite')?.addEventListener('click', function(e) { e.preventDefault(); showSection('favoriteSection'); });
-document.getElementById('navUpload')?.addEventListener('click', function(e) { e.preventDefault(); showSection('newSection'); });
+// Updated Nav Clicks
+document.getElementById('homeLink').addEventListener('click', function(e) { e.preventDefault(); navigateTo('homeSection', this); });
+document.getElementById('homeLink2').addEventListener('click', function(e) { e.preventDefault(); navigateTo('homeSection', this); });
 
-document.getElementById('newLink')?.addEventListener('click', function(e) { e.preventDefault(); showSection('newSection'); setActiveMobile(document.getElementById('navUpload')); });
+document.getElementById('profileLinkNav').addEventListener('click', function(e) { 
+    e.preventDefault(); 
+    <?php if ($username): ?> navigateTo('profileSection', this);
+    <?php else: ?> openModal('loginModal'); <?php endif; ?>
+});
+
+document.getElementById('favoriteLinkNav').addEventListener('click', function(e) { 
+    e.preventDefault(); 
+    <?php if ($username): ?> navigateTo('favoriteSection', this);
+    <?php else: ?> openModal('loginModal'); <?php endif; ?>
+});
+
+document.getElementById('newLink')?.addEventListener('click', function(e) { 
+    e.preventDefault(); 
+    <?php if ($username): ?> navigateTo('newSection', this);
+    <?php else: ?> openModal('loginModal'); <?php endif; ?>
+});
+
+// Mobile Nav updates
+document.getElementById('navHome')?.addEventListener('click', function(e) { e.preventDefault(); navigateTo('homeSection', this); setActiveMobile(this); });
+document.getElementById('navFavorite')?.addEventListener('click', function(e) { 
+    e.preventDefault(); 
+    <?php if ($username): ?> navigateTo('favoriteSection', this); setActiveMobile(this);
+    <?php else: ?> openModal('loginModal'); <?php endif; ?>
+});
+document.getElementById('navUpload')?.addEventListener('click', function(e) { 
+    e.preventDefault(); 
+    <?php if ($username): ?> navigateTo('newSection', this); setActiveMobile(this);
+    <?php else: ?> openModal('loginModal'); <?php endif; ?>
+});
+document.getElementById('navProfile')?.addEventListener('click', function(e) { 
+    e.preventDefault(); 
+    <?php if ($username): ?> navigateTo('profileSection', this); setActiveMobile(this);
+    <?php else: ?> openModal('loginModal'); <?php endif; ?>
+});
+
+function navigateTo(sectionId, el) {
+    showSection(sectionId);
+    // Remove nav-active from all desktop links
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('nav-active', 'border-b-2', 'border-primary', 'text-primary'));
+    // Add to clicked if it's a desktop link
+    if (el.classList.contains('nav-link')) {
+        el.classList.add('nav-active', 'border-b-2', 'border-primary', 'text-primary');
+    }
+}
 
 // Favorite toggle
 document.addEventListener('click', function(e) {
