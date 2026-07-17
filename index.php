@@ -92,18 +92,18 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
             </button>";
         }
 
-        echo "<div class='masonry-item group relative bg-surface-container-lowest border border-outline-variant/50 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300'>
+        echo "<div class='masonry-item group relative bg-surface-container-lowest border border-outline-variant/50 rounded-xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 ease-out'>
                 <div class='relative overflow-hidden cursor-pointer imageLink' data-id='$id'>
-                    <img src='$imgSrc' class='w-full object-cover transition-transform duration-500 group-hover:scale-105' loading='lazy'/>
-                    <div class='absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4'>
-                        <div class='flex justify-end'>
+                    <img src='$imgSrc' class='w-full object-cover transition-transform duration-700 group-hover:scale-110' loading='lazy'/>
+                    <div class='absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-5'>
+                        <div class='flex justify-end transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500'>
                             $btn
                         </div>
                     </div>
                 </div>
-                <div class='p-3'>
+                <div class='p-4 transform transition-all duration-500 group-hover:-translate-y-1'>
                     <h3 class='font-semibold text-sm text-on-surface truncate'>$judul</h3>
-                    <p class='text-xs text-on-surface-variant mt-0.5'>@$owner</p>
+                    <p class='text-xs text-on-surface-variant mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-500'>@$owner</p>
                 </div>
               </div>";
     }
@@ -115,7 +115,7 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="theme-color" content="#0f172a"/>
-    <title>Kelompok 3 Gallery</title>
+    <title>Lumina - Gallery</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,100..700,0..1&display=swap" rel="stylesheet"/>
@@ -159,6 +159,14 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
         .nav-active { border-bottom: 2px solid #0f172a; color: #0f172a !important; }
         .hidden-section { display: none; }
         .nav-link { transition: all 0.2s; }
+        .toast-enter { animation: slideIn 0.35s ease-out; }
+        .toast-exit { animation: slideOut 0.3s ease-in forwards; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+        @keyframes clickPop { 0% { transform: scale(1); } 40% { transform: scale(0.96); } 100% { transform: scale(1); } }
+        .click-effect { animation: clickPop 0.25s ease-out; }
+        @keyframes skeleton { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .skeleton { background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%); background-size: 200% 100%; animation: skeleton 1.5s infinite; }
     </style>
 </head>
 <body class="bg-surface text-on-surface font-sans antialiased selection:bg-primary/10 selection:text-primary">
@@ -168,7 +176,7 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
     <div class="flex items-center justify-between h-full px-4 md:px-margin-x max-w-container-max mx-auto">
         <a href="#" id="homeLink" class="flex items-center gap-2 nav-link">
             <span class="material-symbols-outlined text-primary text-2xl">grid_view</span>
-            <span class="font-bold text-lg text-primary hidden sm:inline">Kelompok 3 Gallery</span>
+            <span class="font-bold text-lg text-primary hidden sm:inline">Lumina</span>
         </a>
         <div class="hidden md:flex items-center gap-6">
             <a href="#" id="homeLink2" class="text-sm font-medium text-primary border-b-2 border-primary pb-0.5 nav-link">Explore</a>
@@ -206,10 +214,10 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
             <button class="px-4 py-1.5 text-sm font-medium bg-surface-container-high text-on-surface-variant rounded-full whitespace-nowrap hover:bg-surface-container-highest transition-colors">Abstract</button>
         </div>
         <div class="masonry-grid"><?php renderCards($images, 'home', $username, $favoritedIds); ?></div>
-        <div class="flex justify-center py-8">
+        <div id="loadingStatus" class="flex justify-center py-12">
             <div class="flex flex-col items-center gap-2">
-                <div class="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-                <p class="text-sm text-on-surface-variant">Discovering more...</p>
+                <div class="w-12 h-12 border-4 border-primary/10 border-t-primary rounded-full animate-spin"></div>
+                <p class="text-sm text-on-surface-variant font-medium">Memuat karya seni...</p>
             </div>
         </div>
     </div>
@@ -317,9 +325,9 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
     <div class="px-4 md:px-margin-x max-w-container-max mx-auto py-8 flex flex-col md:flex-row justify-between items-center gap-4">
         <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">grid_view</span>
-            <span class="font-bold text-primary">Kelompok 3 Gallery</span>
+            <span class="font-bold text-primary">Lumina</span>
         </div>
-        <p class="text-sm text-on-surface-variant">&copy; 2024 Kelompok 3. All rights reserved.</p>
+        <p class="text-sm text-on-surface-variant">&copy; 2024 Lumina. All rights reserved.</p>
         <div class="flex gap-4 text-sm text-on-surface-variant">
             <a href="#" class="hover:text-primary transition-colors">Privacy</a>
             <a href="#" class="hover:text-primary transition-colors">Terms</a>
@@ -463,7 +471,28 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
     </div>
 </div>
 
+<div id="toastContainer" class="fixed top-20 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
 <script>
+// Toast notification system
+function showToast(message, type) {
+    type = type || 'info';
+    var container = document.getElementById('toastContainer');
+    var toast = document.createElement('div');
+    var colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-primary' };
+    var icons = { success: 'check_circle', error: 'error', info: 'info' };
+    toast.className = 'toast-enter pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-white text-sm font-medium ' + (colors[type] || colors.info);
+    toast.innerHTML = '<span class="material-symbols-outlined text-lg">' + (icons[type] || icons.info) + '</span><span>' + message + '</span><button class="ml-2 hover:opacity-70 transition-opacity" onclick="this.closest(\'div\').classList.add(\'toast-exit\');setTimeout(function(){this.closest(\'div\').remove()}.bind(this),300)"><span class="material-symbols-outlined text-base">close</span></button>';
+    container.appendChild(toast);
+    setTimeout(function() {
+        if (toast.parentNode) {
+            toast.classList.remove('toast-enter');
+            toast.classList.add('toast-exit');
+            setTimeout(function() { if (toast.parentNode) toast.remove(); }, 300);
+        }
+    }, 3500);
+}
+
 // Section navigation
 function showSection(id) {
     document.querySelectorAll('.section, #homeSection, #profileSection, #favoriteSection, #imageSection, #newSection').forEach(function(el) {
@@ -592,9 +621,9 @@ document.addEventListener('click', function(e) {
                 btn.classList.remove('favorited');
             }
         }
-        alert(r.message);
+        showToast(r.message, r.status === 'success' ? 'success' : 'error');
     })
-    .catch(function() { alert('Terjadi kesalahan'); });
+    .catch(function() { showToast('Terjadi kesalahan', 'error'); });
 });
 
 // Delete gambar
@@ -610,10 +639,10 @@ document.addEventListener('click', function(e) {
     })
     .then(function(r) { return r.json(); })
     .then(function(r) {
-        alert(r.message || (r.status === 'success' ? 'Gambar dihapus!' : 'Terjadi kesalahan'));
-        if (r.status === 'success') location.reload();
+        showToast(r.message || (r.status === 'success' ? 'Gambar dihapus!' : 'Gagal menghapus'), r.status === 'success' ? 'success' : 'error');
+        if (r.status === 'success') setTimeout(function(){location.reload()}, 1500);
     })
-    .catch(function() { alert('Terjadi kesalahan'); });
+    .catch(function() { showToast('Terjadi kesalahan', 'error'); });
 });
 
 // Delete favorite
@@ -629,10 +658,10 @@ document.addEventListener('click', function(e) {
     })
     .then(function(r) { return r.json(); })
     .then(function(r) {
-        alert(r.message || (r.status === 'success' ? 'Favorit dihapus!' : 'Terjadi kesalahan'));
-        if (r.status === 'success') location.reload();
+        showToast(r.message || (r.status === 'success' ? 'Favorit dihapus!' : 'Gagal menghapus'), r.status === 'success' ? 'success' : 'error');
+        if (r.status === 'success') setTimeout(function(){location.reload()}, 1500);
     })
-    .catch(function() { alert('Terjadi kesalahan'); });
+    .catch(function() { showToast('Terjadi kesalahan', 'error'); });
 });
 
 // Image detail
@@ -702,11 +731,25 @@ document.getElementById('editForm').addEventListener('submit', function(e) {
     })
     .then(function(r) { return r.json(); })
     .then(function(r) {
-        alert(r.message);
-        if (r.status === 'success') location.reload();
+        showToast(r.message, r.status === 'success' ? 'success' : 'error');
+        if (r.status === 'success') setTimeout(function(){location.reload()}, 1500);
     })
-    .catch(function() { alert('Error'); });
+    .catch(function() { showToast('Error', 'error'); });
 });
+
+// Loading status simulation
+(function() {
+    var status = document.getElementById('loadingStatus');
+    if (!status) return;
+    var count = 0;
+    var interval = setInterval(function() {
+        count++;
+        if (count === 3) {
+            clearInterval(interval);
+            status.innerHTML = '<div class="flex flex-col items-center gap-2 opacity-50"><span class="material-symbols-outlined text-4xl">image_not_supported</span><p class="text-sm text-on-surface-variant font-medium">Sudah tidak ada gambar lagi</p></div>';
+        }
+    }, 1500);
+})();
 </script>
 </body>
 </html>
