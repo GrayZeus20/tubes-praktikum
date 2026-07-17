@@ -82,15 +82,15 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
             $btn = "<button type='button' class='delete-favorite-btn btn btn-outline-danger btn-sm' data-favorite-id='$fid' title='Hapus'>♥</button>";
         }
 
-        echo "<div class='col-sm-6 col-md-4 col-lg-3 mb-3'>
-                <div class='pin card'>
-                    <img src='$imgSrc' class='imageLink' data-id='$id'/>
+        echo "<div class='col-sm-6 col-md-4 col-lg-3 mb-4 col-pin'>
+                <div class='card'>
+                    <img src='$imgSrc' class='imageLink' data-id='$id' loading='lazy'/>
                     <div class='card-body'>
-                        $judul<br>
+                        <h6 class='mb-1 font-weight-bold'>$judul</h6>
                         <small class='text-muted'>$ket</small>
-                        <div class='mt-1'><small class='text-primary'>by $owner</small></div>
+                        <div class='mt-2'><small class='text-primary font-weight-bold'>@$owner</small></div>
                     </div>
-                    <div class='card-foot text-right p-2'>$btn</div>
+                    <div class='card-footer bg-white border-0 text-right p-2'>$btn</div>
                 </div>
               </div>";
     }
@@ -101,84 +101,28 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="Gallery aplikasi praktikum">
+    <meta name="theme-color" content="#4F46E5">
     <title>Kelompok3 - Gallery</title>
+    <link rel="preconnect" href="https://stackpath.bootstrapcdn.com">
+    <link rel="preconnect" href="https://code.jquery.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"/>
     <style>
-        html,body{height:100%;margin:0}
-        body{display:flex;flex-direction:column;font-family:'Segoe UI',Arial,sans-serif;background:#f0f0f0}
-        main{flex:1;padding-bottom:2rem}
-        footer{background:linear-gradient(135deg,#60A5FA 0%,#764ba2 100%);text-align:center;padding:1.2rem;color:rgba(255,255,255,.9);font-size:.9rem;width:100%}
-        .pin.card{width:100%;max-width:300px;height:360px;overflow:hidden;transition:transform .2s}
-        .pin.card:hover{transform:scale(1.03)}
-        .pin img{width:100%;height:65%;object-fit:cover;cursor:pointer}
-        #imageDetail img{max-width:100%;max-height:80vh}
-        .favorite-btn{background:none;border:1px solid #e74c3c;color:#e74c3c;font-size:1.1rem;line-height:1;padding:3px 10px;border-radius:20px;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:3px;font-weight:600}
-        .favorite-btn:hover{background:#e74c3c;color:#fff}
-        .favorite-btn.favorited{background:#e74c3c;color:#fff}
-        .favorite-btn.favorited:hover{background:#c0392b;border-color:#c0392b}
-        .btn-outline-danger.btn-sm{line-height:1;font-size:1.1rem}
-        header{background:linear-gradient(135deg,#60A5FA 0%,#764ba2 100%)!important;box-shadow:0 4px 20px rgba(0,0,0,.15)!important}
-        .brand{color:#fff!important;text-decoration:none!important}
-        .brand h3{margin:0;font-weight:700;letter-spacing:-.5px}
-        .brand i{font-style:normal;background:rgba(255,255,255,.2);padding:4px 12px;border-radius:8px;backdrop-filter:blur(4px)}
-        .search-bar input{background:rgba(255,255,255,.9);border:2px solid transparent;border-radius:25px;padding-left:38px;transition:.3s;width:260px;font-size:.9rem}
-        .search-bar input:focus{background:#fff;border-color:#ffd700;width:320px;box-shadow:0 0 15px rgba(255,215,0,.3)}
-        .search-bar{position:relative}
-        .search-bar::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;z-index:1;opacity:.6}
-        .nav-item{display:flex;flex-direction:column;align-items:center;padding:6px 14px;border-radius:12px;cursor:pointer;transition:.25s;color:rgba(255,255,255,.8);text-decoration:none!important;position:relative}
-        .nav-item:hover{background:rgba(255,255,255,.2);color:#fff;transform:translateY(-2px)}
-        .nav-item.active,.nav-item:active{background:rgba(255,255,255,.25);color:#fff}
-        .nav-item img{width:22px;height:22px;filter:brightness(0) invert(1);opacity:.9;transition:.25s}
-        .nav-item:hover img{opacity:1;transform:scale(1.1)}
-        .nav-item .nav-label{font-size:.65rem;margin-top:2px;font-weight:600;letter-spacing:.3px;white-space:nowrap}
-        .nav-item-logout{background:rgba(255,255,255,.12);border-radius:12px;padding:6px 16px;transition:.25s;color:rgba(255,255,255,.9)!important;text-decoration:none!important;display:flex;align-items:center;gap:6px;font-size:.85rem;font-weight:600}
-        .nav-item-logout:hover{background:#e74c3c;color:#fff!important;transform:translateY(-2px)}
-        .nav-item-logout img{width:18px;height:18px;filter:brightness(0) invert(1)}
-        .btn-login{background:rgba(255,255,255,.2)!important;border:2px solid rgba(255,255,255,.4)!important;border-radius:25px!important;color:#fff!important;font-weight:600!important;padding:6px 24px!important;transition:.3s!important}
-        .btn-login:hover{background:#fff!important;color:#667eea!important;border-color:#fff!important;transform:translateY(-2px)}
-        .btn-register{background:#ffd700!important;border:2px solid #ffd700!important;border-radius:25px!important;color:#333!important;font-weight:700!important;padding:6px 24px!important;transition:.3s!important}
-        .btn-register:hover{background:#ffed4a!important;border-color:#ffed4a!important;transform:translateY(-2px);box-shadow:0 4px 15px rgba(255,215,0,.4)}
-        #scrollTopBtn{position:fixed;bottom:30px;right:30px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;box-shadow:0 4px 15px rgba(102,126,234,.4);cursor:pointer;font-size:1.5rem;opacity:0;visibility:hidden;align-items:center;justify-content:center;z-index:999;transition:opacity .4s ease,visibility .4s ease,transform .3s ease,box-shadow .3s ease;display:flex}
-        #scrollTopBtn.show{opacity:1;visibility:visible}
-        #scrollTopBtn:hover{transform:translateY(-6px) scale(1.05);box-shadow:0 8px 25px rgba(102,126,234,.6)}
-        #scrollTopBtn:active{transform:translateY(-2px) scale(.95)}
-        @keyframes pulse-glow{0%,100%{box-shadow:0 4px 15px rgba(102,126,234,.4)}50%{box-shadow:0 4px 25px rgba(102,126,234,.7)}}
-        #scrollTopBtn.show{animation:pulse-glow 2s ease-in-out infinite}
-        @media(max-width:768px){
-            .search-bar input{width:120px;font-size:.8rem;padding-left:32px}
-            .search-bar input:focus{width:160px}
-            .search-bar::before{left:10px;font-size:12px}
-            .nav-item{padding:4px 6px}
-            .nav-item img{width:18px;height:18px}
-            .nav-item .nav-label{display:none}
-            .nav-item-logout{padding:4px 10px;font-size:.75rem}
-            .nav-item-logout img{width:14px;height:14px}
-            .brand h3{font-size:1.1rem}
-            .brand i{padding:3px 8px}
-            header .container{gap:6px}
-            #scrollTopBtn{width:42px;height:42px;bottom:20px;right:20px;font-size:1.2rem}
-            .pin.card{max-width:100%;height:auto;min-height:320px}
-            .pin img{height:200px}
-        }
-        @media(max-width:576px){
-            .search-bar input{width:90px;font-size:.75rem;padding-left:26px}
-            .search-bar input:focus{width:130px}
-            .search-bar::before{left:8px;font-size:10px}
-            .nav-item{padding:3px 4px}
-            .nav-item img{width:16px;height:16px}
-            .nav-item-logout{padding:3px 8px;font-size:.7rem;gap:3px}
-            .nav-item-logout img{width:12px;height:12px}
-            .brand h3{font-size:1rem}
-            .btn-login,.btn-register{padding:4px 14px!important;font-size:.8rem!important}
-            .pin.card{min-height:280px}
-            .pin img{height:160px}
-            .pin .card-body{padding:.75rem}
-            .pin .card-body br{display:none}
-            header .container{flex-wrap:wrap;justify-content:center!important;gap:8px}
-            .mb-4{margin-bottom:1rem!important}
-            .row{margin-left:-8px;margin-right:-8px}
-            .col-sm-6{padding-left:8px;padding-right:8px}
-        }
+        :root { --primary: #4F46E5; --bg: #F8FAFC; --surface: #FFFFFF; --text: #1E293B; --radius: 12px; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); }
+        .card { border: none; border-radius: var(--radius); box-shadow: 0 1px 3px rgba(0,0,0,.1); transition: 0.3s; overflow: hidden; }
+        .card:hover { box-shadow: 0 10px 20px rgba(0,0,0,.15); transform: translateY(-4px); }
+        .pin img { width: 100%; height: 240px; object-fit: cover; cursor: pointer; }
+        header { background: linear-gradient(135deg, #4F46E5, #7C3AED); padding: 1.5rem 0; box-shadow: 0 4px 6px -1px rgba(0,0,0,.1); color: white; }
+        .nav-item { color: rgba(255,255,255,.9); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
+        .nav-item:hover { background: rgba(255,255,255,.2); color: white; }
+        footer { padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-top: 2rem; background: #fff; }
+        .search-bar input { border-radius: 20px; padding-left: 35px; background: #F1F5F9; border: none; }
+        #scrollTopBtn { position: fixed; bottom: 2rem; right: 2rem; width: 3rem; height: 3rem; border-radius: 50%; background: var(--primary); color: white; border: none; box-shadow: 0 4px 10px rgba(0,0,0,.2); display: flex; align-items: center; justify-content: center; cursor: pointer; visibility: hidden; opacity: 0; transition: 0.3s; }
+        #scrollTopBtn.show { visibility: visible; opacity: 1; }
+        .col-pin { content-visibility: auto; contain-intrinsic-size: 0 350px; }
+        @media(max-width: 576px) { .pin img { height: 180px; } }
     </style>
 </head>
 <body>
@@ -196,7 +140,7 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
                     <span class="nav-label">Profile</span>
                 </div>
                 <div class="nav-item" id="favoriteLink" title="Favorit">
-                    <img src="heart (1).svg" alt="Favorit"/>
+                    <img src="heart.svg" alt="Favorit"/>
                     <span class="nav-label">Favorit</span>
                 </div>
                 <div class="nav-item" id="newLink" title="Tambah">
@@ -204,7 +148,7 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
                     <span class="nav-label">Tambah</span>
                 </div>
                 <a href="auth.php?action=logout" class="nav-item-logout ml-2" onclick="return confirm('Logout?')">
-                    <img src="log-out (1).svg" alt="Logout"/> Logout
+                    <img src="log-out.svg" alt="Logout"/> Logout
                 </a>
             <?php else: ?>
                 <button class="btn btn-login ml-2" data-toggle="modal" data-target="#loginModal">Login</button>
