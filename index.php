@@ -36,7 +36,6 @@ if ($search) {
     $images = $koneksi->query("SELECT tb_gambar.*, (SELECT COUNT(*) FROM favorit WHERE id_gambar = tb_gambar.id) as fav_count FROM tb_gambar");
 }
 
-// Get favorited image IDs for current user
 $favoritedIds = [];
 if ($username) {
     $stmt = $koneksi->prepare("SELECT id_gambar FROM favorit WHERE id_user = (SELECT id_user FROM admin WHERE username = ?)");
@@ -49,11 +48,10 @@ if ($username) {
     $stmt->close();
 }
 
-// Render cards helper
 function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds = []) {
     if ($result->num_rows === 0) {
         $msg = $type === 'favorite' ? 'Tidak ada gambar favorit' : 'Gambar tidak ditemukan';
-        echo "<div class='text-center mb-4'><h3>$msg</h3></div>";
+        echo "<div class='col-span-full text-center py-12'><p class='text-on-surface-variant text-lg'>$msg</p></div>";
         return;
     }
     while ($row = $result->fetch_assoc()) {
@@ -69,131 +67,198 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
 
         if ($type === 'home') {
             if ($currentUser) {
-                $heartClass = $isFavorited ? 'favorited' : '';
-                $icon = $isFavorited ? '♥' : '♡';
-                $countHtml = $favCount > 0 ? " $favCount" : '';
-                $btn = "<button type='button' class='favorite-btn btn btn-sm $heartClass' data-id='$id' title='Favorit'>$icon$countHtml</button>";
+                $heartIcon = $isFavorited ? 'favorite' : 'favorite';
+                $fill = $isFavorited ? "'FILL' 1" : "'FILL' 0";
+                $colorClass = $isFavorited ? 'text-red-500' : 'text-white';
+                $countHtml = $favCount > 0 ? "<span class='text-xs ml-0.5'>$favCount</span>" : '';
+                $favClass = $isFavorited ? 'favorited' : '';
+                $btn = "<button type='button' class='favorite-btn w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/40 transition-colors $favClass' data-id='$id'>
+                    <span class='material-symbols-outlined text-sm $colorClass' style='font-variation-settings: $fill'>$heartIcon</span>$countHtml
+                </button>";
             }
         } elseif ($type === 'profile') {
-            $btn = "<button type='button' class='delete-gambar-btn btn btn-outline-info btn-sm' data-gambar-id='$id' title='Hapus'>H</button>
-                    <button type='button' class='edit-gambar-btn btn btn-outline-info btn-sm ml-1' data-gambar-id='$id' title='Edit'>E</button>";
+            $btn = "<div class='flex gap-2'>
+                <button type='button' class='edit-gambar-btn w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/40 transition-colors' data-gambar-id='$id'>
+                    <span class='material-symbols-outlined text-sm text-white'>edit</span>
+                </button>
+                <button type='button' class='delete-gambar-btn w-9 h-9 rounded-full bg-red-500/30 backdrop-blur-sm flex items-center justify-center hover:bg-red-500/50 transition-colors' data-gambar-id='$id'>
+                    <span class='material-symbols-outlined text-sm text-white'>delete</span>
+                </button>
+            </div>";
         } elseif ($type === 'favorite') {
             $fid = htmlspecialchars($row['favorite_id']);
-            $btn = "<button type='button' class='delete-favorite-btn btn btn-outline-danger btn-sm' data-favorite-id='$fid' title='Hapus'>♥</button>";
+            $btn = "<button type='button' class='delete-favorite-btn w-9 h-9 rounded-full bg-red-500/30 backdrop-blur-sm flex items-center justify-center hover:bg-red-500/50 transition-colors' data-favorite-id='$fid'>
+                <span class='material-symbols-outlined text-sm text-white'>favorite</span>
+            </button>";
         }
 
-        echo "<div class='col-sm-6 col-md-4 col-lg-3 mb-4 col-pin'>
-                <div class='card'>
-                    <img src='$imgSrc' class='imageLink' data-id='$id' loading='lazy'/>
-                    <div class='card-body'>
-                        <h6 class='mb-1 font-weight-bold'>$judul</h6>
-                        <small class='text-muted'>$ket</small>
-                        <div class='mt-2'><small class='text-primary font-weight-bold'>@$owner</small></div>
+        echo "<div class='masonry-item group relative bg-surface-container-lowest border border-outline-variant/50 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300'>
+                <div class='relative overflow-hidden cursor-pointer imageLink' data-id='$id'>
+                    <img src='$imgSrc' class='w-full object-cover transition-transform duration-500 group-hover:scale-105' loading='lazy'/>
+                    <div class='absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4'>
+                        <div class='flex justify-end'>
+                            $btn
+                        </div>
                     </div>
-                    <div class='card-footer bg-white border-0 text-right p-2'>$btn</div>
+                </div>
+                <div class='p-3'>
+                    <h3 class='font-semibold text-sm text-on-surface truncate'>$judul</h3>
+                    <p class='text-xs text-on-surface-variant mt-0.5'>@$owner</p>
                 </div>
               </div>";
     }
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta name="description" content="Gallery aplikasi praktikum">
-    <meta name="theme-color" content="#4F46E5">
-    <title>Kelompok3 - Gallery</title>
-    <link rel="preconnect" href="https://stackpath.bootstrapcdn.com">
-    <link rel="preconnect" href="https://code.jquery.com">
-    <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"/>
+    <meta name="theme-color" content="#0f172a"/>
+    <title>Kelompok 3 Gallery</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        primary: '#0f172a',
+                        surface: '#f7f9fb',
+                        'surface-dim': '#d8dadc',
+                        'surface-container-lowest': '#ffffff',
+                        'surface-container-low': '#f2f4f6',
+                        'surface-container': '#eceef0',
+                        'surface-container-high': '#e6e8ea',
+                        'on-surface': '#0f172a',
+                        'on-surface-variant': '#475569',
+                        'outline': '#94a3b8',
+                        'outline-variant': '#cbd5e1',
+                    },
+                    spacing: {
+                        'margin-x': '64px',
+                        'container-max': '1440px',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root { --primary: #4F46E5; --bg: #F8FAFC; --surface: #FFFFFF; --text: #1E293B; --radius: 12px; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); }
-        .card { border: none; border-radius: var(--radius); box-shadow: 0 1px 3px rgba(0,0,0,.1); transition: 0.3s; overflow: hidden; }
-        .card:hover { box-shadow: 0 10px 20px rgba(0,0,0,.15); transform: translateY(-4px); }
-        .pin img { width: 100%; height: 240px; object-fit: cover; cursor: pointer; }
-        header { background: linear-gradient(135deg, #4F46E5, #7C3AED); padding: 1.5rem 0; box-shadow: 0 4px 6px -1px rgba(0,0,0,.1); color: white; }
-        .nav-item { color: rgba(255,255,255,.9); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
-        .nav-item:hover { background: rgba(255,255,255,.2); color: white; }
-        footer { padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-top: 2rem; background: #fff; }
-        .search-bar input { border-radius: 20px; padding-left: 35px; background: #F1F5F9; border: none; }
-        #scrollTopBtn { position: fixed; bottom: 2rem; right: 2rem; width: 3rem; height: 3rem; border-radius: 50%; background: var(--primary); color: white; border: none; box-shadow: 0 4px 10px rgba(0,0,0,.2); display: flex; align-items: center; justify-content: center; cursor: pointer; visibility: hidden; opacity: 0; transition: 0.3s; }
-        #scrollTopBtn.show { visibility: visible; opacity: 1; }
-        .col-pin { content-visibility: auto; contain-intrinsic-size: 0 350px; }
-        @media(max-width: 576px) { .pin img { height: 180px; } }
+        body { font-family: 'Inter', sans-serif; }
+        .masonry-grid { columns: 2; column-gap: 16px; }
+        @media (min-width: 768px) { .masonry-grid { columns: 3; column-gap: 20px; } }
+        @media (min-width: 1024px) { .masonry-grid { columns: 4; column-gap: 24px; } }
+        .masonry-item { break-inside: avoid; margin-bottom: 16px; }
+        @media (min-width: 768px) { .masonry-item { margin-bottom: 20px; } }
+        .modal-backdrop { background: rgba(15,23,42,0.5); backdrop-filter: blur(4px); }
+        .auth-card-blur { backdrop-filter: blur(16px); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes pulse-soft { 0%,100% { opacity: 0.3; } 50% { opacity: 0.5; } }
+        .animate-pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
     </style>
 </head>
-<body>
+<body class="bg-surface text-on-surface font-sans antialiased selection:bg-primary/10 selection:text-primary">
 
-<header class="p-3 mb-4">
-    <div class="container d-flex justify-content-between align-items-center">
-        <a href="#" id="homeLink" class="brand"><h3><i>Kelompok 3</i></h3></a>
-        <form action="index.php" method="get" class="search-bar">
-            <input type="text" class="form-control" placeholder="Cari gambar..." name="cari" value="<?=htmlspecialchars($search)?>"/>
-        </form>
-        <nav class="d-flex align-items-center" style="gap:4px">
+<!-- Header -->
+<header class="fixed top-0 w-full h-16 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/30 z-50">
+    <div class="flex items-center justify-between h-full px-4 md:px-margin-x max-w-container-max mx-auto">
+        <a href="#" id="homeLink" class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-2xl">grid_view</span>
+            <span class="font-bold text-lg text-primary hidden sm:inline">Kelompok 3 Gallery</span>
+        </a>
+        <div class="hidden md:flex items-center gap-6">
+            <a href="#" id="homeLink2" class="text-sm font-medium text-primary border-b-2 border-primary pb-0.5">Explore</a>
+            <a href="#" id="favoriteLinkNav" class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors">Favorites</a>
+            <a href="#" id="profileLinkNav" class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors">Profile</a>
+        </div>
+        <div class="flex items-center gap-3">
+            <form action="index.php" method="get" class="relative hidden sm:block">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg pointer-events-none">search</span>
+                <input type="text" name="cari" value="<?=htmlspecialchars($search)?>" placeholder="Search..." class="h-9 pl-9 pr-3 text-sm bg-surface-container-low border-none rounded-full focus:ring-2 focus:ring-primary/30 w-48 lg:w-64 transition-all"/>
+            </form>
             <?php if ($username): ?>
-                <div class="nav-item" id="profileLink" title="Profile">
-                    <img src="user.svg" alt="Profile"/>
-                    <span class="nav-label">Profile</span>
-                </div>
-                <div class="nav-item" id="favoriteLink" title="Favorit">
-                    <img src="heart.svg" alt="Favorit"/>
-                    <span class="nav-label">Favorit</span>
-                </div>
-                <div class="nav-item" id="newLink" title="Tambah">
-                    <img src="plus-square.svg" alt="Tambah"/>
-                    <span class="nav-label">Tambah</span>
-                </div>
-                <a href="auth.php?action=logout" class="nav-item-logout ml-2" onclick="return confirm('Logout?')">
-                    <img src="log-out.svg" alt="Logout"/> Logout
+                <span class="hidden sm:block text-sm text-on-surface-variant"><?=htmlspecialchars($username)?></span>
+                <button id="newLink" class="flex items-center justify-center w-9 h-9 rounded-full bg-primary text-white hover:opacity-90 transition-opacity">
+                    <span class="material-symbols-outlined text-lg">add</span>
+                </button>
+                <a href="auth.php?action=logout" onclick="return confirm('Logout?')" class="flex items-center justify-center w-9 h-9 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-red-500 hover:text-white transition-all">
+                    <span class="material-symbols-outlined text-lg">logout</span>
                 </a>
             <?php else: ?>
-                <button class="btn btn-login ml-2" data-toggle="modal" data-target="#loginModal">Login</button>
-                <button class="btn btn-register ml-2" data-toggle="modal" data-target="#registerModal">Register</button>
+                <button onclick="openModal('loginModal')" class="text-sm font-medium text-primary px-4 py-1.5 hover:opacity-80 transition-opacity">Sign In</button>
+                <button onclick="openModal('registerModal')" class="text-sm font-medium bg-primary text-white px-4 py-1.5 rounded-lg hover:opacity-90 transition-opacity">Register</button>
             <?php endif; ?>
-        </nav>
+        </div>
     </div>
 </header>
 
-<main class="container">
-    <!-- Home -->
-    <div id="homeSection" class="section">
-        <div class="row"><?php renderCards($images, 'home', $username, $favoritedIds); ?></div>
-    </div>
+<main class="pt-20 pb-24 md:pb-12 px-4 md:px-margin-x max-w-container-max mx-auto">
 
-    <!-- Profile -->
-    <div id="profileSection" class="section" style="display:none">
-        <div class="text-center mb-4">
-            <h3>Selamat Datang <?=htmlspecialchars($username)?></h3>
-            <?php
-            $countStmt = $koneksi->prepare("SELECT COUNT(*) as total FROM tb_gambar WHERE username = ?");
-            $countStmt->bind_param("s", $username);
-            $countStmt->execute();
-            $countRow = $countStmt->get_result()->fetch_assoc();
-            $countStmt->close();
-            echo "<p class='text-muted'>Total gambar: " . $countRow['total'] . "</p>";
-            ?>
+    <!-- Home Section -->
+    <div id="homeSection">
+        <div class="flex items-center gap-2 overflow-x-auto pb-4 mb-4 no-scrollbar">
+            <button class="px-4 py-1.5 text-sm font-medium bg-primary text-white rounded-full whitespace-nowrap">All Media</button>
+            <button class="px-4 py-1.5 text-sm font-medium bg-surface-container-high text-on-surface-variant rounded-full whitespace-nowrap hover:bg-surface-container-highest transition-colors">Photography</button>
+            <button class="px-4 py-1.5 text-sm font-medium bg-surface-container-high text-on-surface-variant rounded-full whitespace-nowrap hover:bg-surface-container-highest transition-colors">Digital Art</button>
+            <button class="px-4 py-1.5 text-sm font-medium bg-surface-container-high text-on-surface-variant rounded-full whitespace-nowrap hover:bg-surface-container-highest transition-colors">Abstract</button>
         </div>
-        <div class="row">
-            <?php
-            if ($username) {
-                $stmt = $koneksi->prepare("SELECT * FROM tb_gambar WHERE username = ?");
-                $stmt->bind_param("s", $username);
-                $stmt->execute();
-                renderCards($stmt->get_result(), 'profile', $username);
-                $stmt->close();
-            }
-            ?>
+        <div class="masonry-grid"><?php renderCards($images, 'home', $username, $favoritedIds); ?></div>
+        <div class="flex justify-center py-8">
+            <div class="flex flex-col items-center gap-2">
+                <div class="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                <p class="text-sm text-on-surface-variant">Discovering more...</p>
+            </div>
         </div>
     </div>
 
-    <!-- Favorite -->
-    <div id="favoriteSection" class="section" style="display:none">
-        <div class="text-center mb-4"><h3>Favorite</h3></div>
-        <div class="row">
+    <!-- Profile Section -->
+    <div id="profileSection" class="section hidden">
+        <div class="max-w-3xl mx-auto">
+            <div class="flex flex-col items-center mb-6">
+                <div class="w-20 h-20 rounded-full bg-surface-container-high flex items-center justify-center mb-3">
+                    <span class="material-symbols-outlined text-4xl text-on-surface-variant">person</span>
+                </div>
+                <h2 class="text-xl font-bold"><?=htmlspecialchars($username)?></h2>
+                <?php
+                $countStmt = $koneksi->prepare("SELECT COUNT(*) as total FROM tb_gambar WHERE username = ?");
+                $countStmt->bind_param("s", $username);
+                $countStmt->execute();
+                $countRow = $countStmt->get_result()->fetch_assoc();
+                $countStmt->close();
+                ?>
+                <p class="text-sm text-on-surface-variant mt-1"><?=$countRow['total']?> uploads</p>
+            </div>
+            <div class="flex justify-center border-b border-outline-variant mb-6">
+                <button class="pb-3 px-4 text-sm font-medium text-primary border-b-2 border-primary flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">grid_on</span>
+                    My Uploads
+                </button>
+                <button class="pb-3 px-4 text-sm font-medium text-on-surface-variant flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">favorite</span>
+                    Favorites
+                </button>
+            </div>
+            <div class="masonry-grid">
+                <?php
+                if ($username) {
+                    $stmt = $koneksi->prepare("SELECT * FROM tb_gambar WHERE username = ?");
+                    $stmt->bind_param("s", $username);
+                    $stmt->execute();
+                    renderCards($stmt->get_result(), 'profile', $username);
+                    $stmt->close();
+                }
+                ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Favorite Section -->
+    <div id="favoriteSection" class="hidden">
+        <div class="text-center mb-6"><h2 class="text-xl font-bold">Favorites</h2></div>
+        <div class="masonry-grid">
             <?php
             if ($username) {
                 $stmt = $koneksi->prepare("SELECT g.id, g.judul, g.keterangan, f.id as favorite_id FROM tb_gambar g INNER JOIN favorit f ON g.id = f.id_gambar WHERE f.id_user = (SELECT id_user FROM admin WHERE username = ?)");
@@ -202,272 +267,406 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
                 renderCards($stmt->get_result(), 'favorite', $username);
                 $stmt->close();
             } else {
-                echo "<div class='text-center mb-4'><h3>Silakan login</h3></div>";
+                echo "<div class='col-span-full text-center py-12'><p class='text-on-surface-variant text-lg'>Please sign in to view favorites</p></div>";
             }
             ?>
         </div>
     </div>
 
-    <!-- Image Detail -->
-    <div id="imageSection" class="section" style="display:none">
-        <div class="col-md-8 m-auto">
-            <div class="card text-left mb-5">
-                <div class="card-body text-center" id="imageDetail"></div>
+    <!-- Image Detail Section -->
+    <div id="imageSection" class="hidden">
+        <div class="max-w-4xl mx-auto">
+            <div id="imageDetail" class="bg-surface-container-lowest border border-outline-variant/50 rounded-xl overflow-hidden"></div>
+        </div>
+    </div>
+
+    <!-- Upload Section -->
+    <div id="newSection" class="hidden">
+        <div class="max-w-lg mx-auto">
+            <div class="bg-surface-container-lowest border border-outline-variant/50 rounded-xl p-6">
+                <h2 class="text-xl font-bold mb-4">Upload New Image</h2>
+                <?php if (isset($upload_error)): ?>
+                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-sm mb-4"><?=$upload_error?></div>
+                <?php endif; ?>
+                <form action="" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-on-surface mb-1">Image</label>
+                        <input type="file" name="gambar" class="block w-full text-sm text-on-surface file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-white hover:file:opacity-90" id="uploadGambar" required onchange="previewImage(this)">
+                        <div class="mt-2 preview-wrap hidden">
+                            <img src="#" alt="Preview" class="max-h-48 rounded-lg border border-outline-variant"/>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-on-surface mb-1">Title</label>
+                        <input type="text" name="judul" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-on-surface mb-1">Description</label>
+                        <textarea name="keterangan" class="w-full px-3 py-2 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" name="input" class="w-full h-10 bg-primary text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">Upload</button>
+                </form>
             </div>
         </div>
     </div>
 
-    <!-- New Upload -->
-    <div id="newSection" class="section" style="display:none">
-        <div class="col-md-8 m-auto">
-            <div class="card text-left mb-5">
-                <div class="card-header text-center"><h3>Upload Baru</h3></div>
-                <div class="card-body">
-                    <?php if (isset($upload_error)): ?>
-                        <div class="alert alert-danger"><?=$upload_error?></div>
-                    <?php endif; ?>
-                    <form action="" method="POST" enctype="multipart/form-data">
-                        <div class="form-group">
-                            <label>Gambar</label>
-                            <input type="file" name="gambar" class="form-control-file" id="uploadGambar" required onchange="previewImage(this)">
-                            <div class="mt-2 preview-wrap" style="display:none">
-                                <img src="#" alt="Preview" class="img-fluid rounded border" style="max-height:250px"/>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Judul</label>
-                            <input type="text" name="judul" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Keterangan</label>
-                            <textarea name="keterangan" class="form-control" rows="3" required></textarea>
-                        </div>
-                        <button type="submit" name="input" class="btn btn-primary">Upload</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 </main>
 
+<!-- Footer -->
+<footer class="hidden md:block w-full border-t border-outline-variant/30 bg-surface-container-lowest">
+    <div class="px-4 md:px-margin-x max-w-container-max mx-auto py-8 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">grid_view</span>
+            <span class="font-bold text-primary">Kelompok 3 Gallery</span>
+        </div>
+        <p class="text-sm text-on-surface-variant">&copy; 2024 Kelompok 3. All rights reserved.</p>
+        <div class="flex gap-4 text-sm text-on-surface-variant">
+            <a href="#" class="hover:text-primary transition-colors">Privacy</a>
+            <a href="#" class="hover:text-primary transition-colors">Terms</a>
+            <a href="#" class="hover:text-primary transition-colors">Contact</a>
+        </div>
+    </div>
+</footer>
+
+<!-- Scroll to Top -->
+<button id="scrollTopBtn" class="fixed bottom-6 right-6 w-11 h-11 bg-primary text-white rounded-xl shadow-lg flex items-center justify-center z-40 opacity-0 invisible transition-all hover:scale-110 active:scale-95">
+    <span class="material-symbols-outlined">arrow_upward</span>
+</button>
+
+<!-- Bottom Nav (Mobile) -->
+<nav class="fixed bottom-0 w-full flex justify-around py-2 bg-surface-container-lowest border-t border-outline-variant/30 md:hidden z-50">
+    <button id="navHome" class="flex flex-col items-center p-1 text-primary" onclick="showSection('homeSection'); setActiveMobile(this);">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">home</span>
+        <span class="text-[10px] font-medium">Explore</span>
+    </button>
+    <button id="navFavorite" class="flex flex-col items-center p-1 text-on-surface-variant" onclick="showSection('favoriteSection'); setActiveMobile(this);">
+        <span class="material-symbols-outlined">favorite</span>
+        <span class="text-[10px] font-medium">Favorites</span>
+    </button>
+    <button id="navUpload" class="flex flex-col items-center p-1 text-on-surface-variant" onclick="showSection('newSection'); setActiveMobile(this);">
+        <span class="material-symbols-outlined">add_box</span>
+        <span class="text-[10px] font-medium">Upload</span>
+    </button>
+    <button id="navProfile" class="flex flex-col items-center p-1 text-on-surface-variant" onclick="showSection('profileSection'); setActiveMobile(this);">
+        <span class="material-symbols-outlined">person</span>
+        <span class="text-[10px] font-medium">Profile</span>
+    </button>
+</nav>
+
 <!-- Login Modal -->
-<div class="modal fade" id="loginModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header"><h5>Login</h5><button type="button" class="close" data-dismiss="modal">&times;</button></div>
-            <form action="auth.php?action=login" method="POST">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>Username</label>
-                        <input type="text" name="username" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Password</label>
-                        <div class="input-group">
-                            <input type="password" name="password" class="form-control" id="loginPassword" required>
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="button" id="toggleLoginPass" tabindex="-1">
-                                    <span id="loginEyeIcon">Tampilkan</span>
-                                </button>
-                            </div>
-                        </div>
+<div id="loginModal" class="fixed inset-0 z-50 hidden">
+    <div class="modal-backdrop absolute inset-0" onclick="closeModal('loginModal')"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-surface-container-lowest border border-outline-variant/50 rounded-xl shadow-xl p-6 auth-card-blur">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold">Sign In</h2>
+                <button onclick="closeModal('loginModal')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form action="auth.php?action=login" method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-on-surface mb-1">Username</label>
+                    <input type="text" name="username" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-on-surface mb-1">Password</label>
+                    <div class="relative">
+                        <input type="password" name="password" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" id="loginPassword" required>
+                        <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-on-surface-variant hover:text-primary" onclick="togglePassword('loginPassword', this)">Show</button>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Login</button>
-                </div>
+                <button type="submit" class="w-full h-10 bg-primary text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">Sign In</button>
             </form>
+            <p class="text-center text-sm text-on-surface-variant mt-4">
+                Don't have an account? <a href="javascript:void(0)" class="text-primary font-medium hover:underline" onclick="closeModal('loginModal');openModal('registerModal')">Register</a>
+            </p>
         </div>
     </div>
 </div>
 
 <!-- Register Modal -->
-<div class="modal fade" id="registerModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header"><h5>Register</h5><button type="button" class="close" data-dismiss="modal">&times;</button></div>
-            <form action="auth.php?action=register" method="POST">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>Username</label>
-                        <input type="text" name="username" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" name="password" class="form-control" required>
-                    </div>
+<div id="registerModal" class="fixed inset-0 z-50 hidden">
+    <div class="modal-backdrop absolute inset-0" onclick="closeModal('registerModal')"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-surface-container-lowest border border-outline-variant/50 rounded-xl shadow-xl p-6 auth-card-blur">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold">Register</h2>
+                <button onclick="closeModal('registerModal')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form action="auth.php?action=register" method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-on-surface mb-1">Username</label>
+                    <input type="text" name="username" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" required>
                 </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Register</button>
+                <div>
+                    <label class="block text-sm font-medium text-on-surface mb-1">Password</label>
+                    <input type="password" name="password" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" required>
                 </div>
+                <button type="submit" class="w-full h-10 bg-primary text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">Register</button>
             </form>
+            <p class="text-center text-sm text-on-surface-variant mt-4">
+                Already have an account? <a href="javascript:void(0)" class="text-primary font-medium hover:underline" onclick="closeModal('registerModal');openModal('loginModal')">Sign In</a>
+            </p>
         </div>
     </div>
 </div>
 
 <!-- Edit Modal -->
-<div class="modal fade" id="editModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form id="editForm" enctype="multipart/form-data">
-                <div class="modal-header"><h5>Edit Gambar</h5><button type="button" class="close" data-dismiss="modal">&times;</button></div>
-                <div class="modal-body">
-                    <input type="hidden" name="id" id="editId">
-                    <div class="form-group text-center">
-                        <label>Gambar Saat Ini</label><br>
-                        <img id="editCurrentImage" src="#" alt="Current" class="img-fluid rounded border" style="max-height:200px;display:none"/>
-                    </div>
-                    <div class="form-group">
-                        <label>Judul</label>
-                        <input type="text" class="form-control" id="editJudul" name="judul" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Keterangan</label>
-                        <textarea class="form-control" id="editKeterangan" name="keterangan" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Gambar Baru (kosongkan jika tidak diubah)</label>
-                        <input type="file" class="form-control-file" name="gambar" onchange="previewImage(this)">
-                        <div class="mt-2" id="previewContainerEdit" style="display:none">
-                            <img id="previewImgEdit" src="#" alt="Preview" class="img-fluid rounded border" style="max-height:200px"/>
-                        </div>
+<div id="editModal" class="fixed inset-0 z-50 hidden">
+    <div class="modal-backdrop absolute inset-0" onclick="closeModal('editModal')"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="w-full max-w-lg bg-surface-container-lowest border border-outline-variant/50 rounded-xl shadow-xl p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold">Edit Image</h2>
+                <button onclick="closeModal('editModal')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form id="editForm" enctype="multipart/form-data" class="space-y-4">
+                <input type="hidden" name="id" id="editId">
+                <div class="text-center">
+                    <img id="editCurrentImage" src="#" alt="Current" class="max-h-40 rounded-lg border border-outline-variant hidden mx-auto"/>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-on-surface mb-1">Title</label>
+                    <input type="text" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" id="editJudul" name="judul" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-on-surface mb-1">Description</label>
+                    <textarea class="w-full px-3 py-2 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" id="editKeterangan" name="keterangan" rows="3" required></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-on-surface mb-1">New Image (optional)</label>
+                    <input type="file" class="block w-full text-sm text-on-surface file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-white hover:file:opacity-90" name="gambar" onchange="previewImage(this)">
+                    <div class="mt-2 previewContainerEdit hidden">
+                        <img id="previewImgEdit" src="#" alt="Preview" class="max-h-40 rounded-lg border border-outline-variant"/>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
+                <div class="flex gap-3">
+                    <button type="button" class="flex-1 h-10 border border-outline-variant text-sm font-medium rounded-lg hover:bg-surface-container-low transition-colors" onclick="closeModal('editModal')">Cancel</button>
+                    <button type="submit" class="flex-1 h-10 bg-primary text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">Save</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<button id="scrollTopBtn" title="Ke atas">&#8593;</button>
-
-<footer>&copy; 2024 Kelompok 3. All rights reserved.</footer>
-
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
-$(document).ready(function() {
-    // Scroll to top
-    var scrollBtn = $('#scrollTopBtn');
-    $(window).scroll(function() {
-        $(this).scrollTop() > 300 ? scrollBtn.addClass('show') : scrollBtn.removeClass('show');
-    });
-    scrollBtn.click(function() {
-        $('html,body').animate({ scrollTop: 0 }, 500, 'swing');
-    });
-
-    function showSection(id) { $('.section').hide(); $('#' + id).show(); }
-
-    function setActiveNav(el) {
-        $('.nav-item').removeClass('active');
-        if (el) el.addClass('active');
-    }
-
-    $('#toggleLoginPass').click(function() {
-        var input = $('#loginPassword');
-        var icon = $('#loginEyeIcon');
-        if (input.attr('type') === 'password') {
-            input.attr('type', 'text');
-            icon.text('Sembunyikan');
-        } else {
-            input.attr('type', 'password');
-            icon.text('Tampilkan');
+// Section navigation
+function showSection(id) {
+    document.querySelectorAll('.section, #homeSection, #profileSection, #favoriteSection, #imageSection, #newSection').forEach(function(el) {
+        if (el.id === id) {
+            el.classList.remove('hidden');
+        } else if (el.classList.contains('hidden') === false && (el.id.endsWith('Section') || el.id === 'homeSection')) {
+            el.classList.add('hidden');
         }
     });
+}
 
-    $('#homeLink').click(function(e) { e.preventDefault(); showSection('homeSection'); setActiveNav(null); });
-    $('#profileLink').click(function(e) { e.preventDefault(); showSection('profileSection'); setActiveNav($(this)); });
-    $('#favoriteLink').click(function(e) { e.preventDefault(); showSection('favoriteSection'); setActiveNav($(this)); });
-    $('#newLink').click(function(e) { e.preventDefault(); showSection('newSection'); setActiveNav($(this)); });
-
-    $(document).on('click', '.favorite-btn', function() {
-        var btn = $(this);
-        $.post('api.php', { action: 'favorit', id: btn.data('id') })
-            .done(function(r) {
-                if (r.status === 'success') {
-                    if (r.action === 'added') {
-                        btn.addClass('favorited').html('♥');
-                    } else {
-                        btn.removeClass('favorited').html('♡');
-                    }
-                }
-                alert(r.message);
-            })
-            .fail(function() { alert('Terjadi kesalahan'); });
+function setActiveMobile(el) {
+    document.querySelectorAll('nav button').forEach(function(b) {
+        b.classList.remove('text-primary');
+        b.classList.add('text-on-surface-variant');
+        var icon = b.querySelector('.material-symbols-outlined');
+        if (icon) icon.style.fontVariationSettings = "'FILL' 0";
     });
+    el.classList.remove('text-on-surface-variant');
+    el.classList.add('text-primary');
+    var icon = el.querySelector('.material-symbols-outlined');
+    if (icon) icon.style.fontVariationSettings = "'FILL' 1";
+}
 
-    $(document).on('click', '.delete-gambar-btn', function() {
-        if (!confirm('Hapus gambar ini?')) return;
-        $.post('api.php', { action: 'delete_gambar', id_gambar: $(this).data('gambar-id') })
-            .done(function(r) { alert(r.message || (r.status === 'success' ? 'Gambar dihapus!' : 'Terjadi kesalahan')); if (r.status === 'success') location.reload(); })
-            .fail(function() { alert('Terjadi kesalahan'); });
-    });
+// Modal controls
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-    $(document).on('click', '.delete-favorite-btn', function() {
-        if (!confirm('Hapus dari favorit?')) return;
-        $.post('api.php', { action: 'delete_favorit', id_favorite: $(this).data('favorite-id') })
-            .done(function(r) { alert(r.message || (r.status === 'success' ? 'Favorit dihapus!' : 'Terjadi kesalahan')); if (r.status === 'success') location.reload(); })
-            .fail(function() { alert('Terjadi kesalahan'); });
-    });
+// Password toggle
+function togglePassword(inputId, btn) {
+    var input = document.getElementById(inputId);
+    if (input.type === 'password') { input.type = 'text'; btn.textContent = 'Hide'; }
+    else { input.type = 'password'; btn.textContent = 'Show'; }
+}
 
-    $(document).on('click', '.imageLink', function() {
-        var id = $(this).data('id');
-        showSection('imageSection');
-        $.post('api.php', { action: 'get_image_details', id: id }, function(r) {
-            if (r.error) { $('#imageDetail').html('<div class="alert alert-danger">' + r.error + '</div>'); }
-            else {
-                var favHtml = parseInt(r.fav_count) > 0 ? '<span class="badge badge-danger">♥ ' + r.fav_count + '</span>' : '';
-                $('#imageDetail').html(
-                    '<button class="btn btn-outline-secondary mb-3" onclick="$(\'#homeLink\').click()">← Kembali</button>' +
-                    '<img src="img_view.php?id=' + r.id + '" class="img-fluid"/>' +
-                    '<h3 class="mt-3">' + r.judul + ' ' + favHtml + '</h3>' +
-                    '<p class="text-muted">' + r.keterangan + '</p>' +
-                    '<small class="text-primary">by ' + r.username + '</small>'
-                );
-            }
-        }, 'json').fail(function() { $('#imageDetail').html('<div class="alert alert-danger">Gagal memuat gambar</div>'); });
-    });
+// Image preview
+function previewImage(input) {
+    var container = input.closest('div').querySelector('.preview-wrap, .previewContainerEdit');
+    if (!container) return;
+    var img = container.querySelector('img');
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) { img.src = e.target.result; container.classList.remove('hidden'); };
+        reader.readAsDataURL(input.files[0]);
+    } else { container.classList.add('hidden'); img.src = '#'; }
+}
 
-    $(document).on('click', '.edit-gambar-btn', function() {
-        var btn = $(this);
-        $.get('api.php', { action: 'get_image_data', id: btn.data('gambar-id') }, function(r) {
-            if (r.error) { alert(r.error); }
-            else {
-                $('#editId').val(r.id);
-                $('#editJudul').val(r.judul);
-                $('#editKeterangan').val(r.keterangan);
-                $('#editCurrentImage').attr('src', 'img_view.php?id=' + r.id).show();
-                $('#previewContainerEdit').hide();
-                $('#editModal').modal('show');
-            }
-        }).fail(function() { alert('Gagal memuat data gambar'); });
-    });
-
-    function previewImage(input) {
-        var wrap = $(input).closest('.form-group').find('.preview-wrap, #previewContainerEdit').first();
-        var img = wrap.find('img');
-        if (!img.length) img = wrap.find('#previewImgEdit');
-        if (input.files && input.files[0]) {
-            var reader = new FileReader();
-            reader.onload = function(e) { img.attr('src', e.target.result); wrap.show(); };
-            reader.readAsDataURL(input.files[0]);
-        } else { wrap.hide(); img.attr('src', '#'); }
+// Scroll to top
+var scrollBtn = document.getElementById('scrollTopBtn');
+window.addEventListener('scroll', function() {
+    if (window.scrollY > 300) {
+        scrollBtn.classList.remove('opacity-0', 'invisible');
+        scrollBtn.classList.add('opacity-100', 'visible');
+    } else {
+        scrollBtn.classList.add('opacity-0', 'invisible');
+        scrollBtn.classList.remove('opacity-100', 'visible');
     }
+});
+scrollBtn.addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
-    $('#editForm').on('submit', function(e) {
-        e.preventDefault();
-        var fd = new FormData(this);
-        fd.append('action', 'update');
-        $.ajax({
-            url: 'api.php', type: 'POST', data: fd, contentType: false, processData: false,
-            success: function(r) { alert(r.message); if (r.status === 'success') location.reload(); },
-            error: function() { alert('Error'); }
-        });
-    });
+// Nav clicks
+document.getElementById('homeLink').addEventListener('click', function(e) { e.preventDefault(); showSection('homeSection'); setActiveMobile(document.getElementById('navHome')); });
+if (document.getElementById('homeLink2')) document.getElementById('homeLink2').addEventListener('click', function(e) { e.preventDefault(); showSection('homeSection'); });
+if (document.getElementById('profileLinkNav')) document.getElementById('profileLinkNav').addEventListener('click', function(e) { e.preventDefault(); showSection('profileSection'); });
+if (document.getElementById('favoriteLinkNav')) document.getElementById('favoriteLinkNav').addEventListener('click', function(e) { e.preventDefault(); showSection('favoriteSection'); });
+document.getElementById('navProfile')?.addEventListener('click', function(e) { e.preventDefault(); showSection('profileSection'); });
+document.getElementById('navFavorite')?.addEventListener('click', function(e) { e.preventDefault(); showSection('favoriteSection'); });
+document.getElementById('navUpload')?.addEventListener('click', function(e) { e.preventDefault(); showSection('newSection'); });
+
+document.getElementById('newLink')?.addEventListener('click', function(e) { e.preventDefault(); showSection('newSection'); setActiveMobile(document.getElementById('navUpload')); });
+
+// Favorite toggle
+document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.favorite-btn');
+    if (!btn) return;
+    var id = btn.getAttribute('data-id');
+    fetch('api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'action=favorit&id=' + id
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(r) {
+        if (r.status === 'success') {
+            var icon = btn.querySelector('.material-symbols-outlined');
+            var countEl = btn.querySelector('span:not(.material-symbols-outlined)');
+            if (r.action === 'added') {
+                icon.style.fontVariationSettings = "'FILL' 1";
+                icon.classList.add('text-red-500');
+                icon.classList.remove('text-white');
+                btn.classList.add('favorited');
+            } else {
+                icon.style.fontVariationSettings = "'FILL' 0";
+                icon.classList.remove('text-red-500');
+                icon.classList.add('text-white');
+                btn.classList.remove('favorited');
+            }
+        }
+        alert(r.message);
+    })
+    .catch(function() { alert('Terjadi kesalahan'); });
+});
+
+// Delete gambar
+document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.delete-gambar-btn');
+    if (!btn) return;
+    if (!confirm('Hapus gambar ini?')) return;
+    var id = btn.getAttribute('data-gambar-id');
+    fetch('api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'action=delete_gambar&id_gambar=' + id
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(r) {
+        alert(r.message || (r.status === 'success' ? 'Gambar dihapus!' : 'Terjadi kesalahan'));
+        if (r.status === 'success') location.reload();
+    })
+    .catch(function() { alert('Terjadi kesalahan'); });
+});
+
+// Delete favorite
+document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.delete-favorite-btn');
+    if (!btn) return;
+    if (!confirm('Hapus dari favorit?')) return;
+    var id = btn.getAttribute('data-favorite-id');
+    fetch('api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'action=delete_favorit&id_favorite=' + id
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(r) {
+        alert(r.message || (r.status === 'success' ? 'Favorit dihapus!' : 'Terjadi kesalahan'));
+        if (r.status === 'success') location.reload();
+    })
+    .catch(function() { alert('Terjadi kesalahan'); });
+});
+
+// Image detail
+document.addEventListener('click', function(e) {
+    var el = e.target.closest('.imageLink');
+    if (!el) return;
+    var id = el.getAttribute('data-id');
+    showSection('imageSection');
+    fetch('api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'action=get_image_details&id=' + id
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(r) {
+        var container = document.getElementById('imageDetail');
+        if (r.error) {
+            container.innerHTML = '<div class="p-6 text-center"><p class="text-red-500">' + r.error + '</p></div>';
+        } else {
+            var favHtml = parseInt(r.fav_count) > 0 ? ' <span class="text-red-500 text-sm">♥ ' + r.fav_count + '</span>' : '';
+            container.innerHTML =
+                '<div class="p-4 border-b border-outline-variant/30">' +
+                    '<button class="text-sm text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1" onclick="showSection(\'homeSection\')">' +
+                        '<span class="material-symbols-outlined text-lg">arrow_back</span> Back' +
+                    '</button>' +
+                '</div>' +
+                '<div class="p-6 text-center">' +
+                    '<img src="img_view.php?id=' + r.id + '" class="max-h-[70vh] mx-auto rounded-lg object-contain"/>' +
+                    '<h3 class="text-xl font-bold mt-4">' + r.judul + favHtml + '</h3>' +
+                    '<p class="text-on-surface-variant mt-2">' + r.keterangan + '</p>' +
+                    '<p class="text-sm text-on-surface-variant mt-3">by <span class="text-primary font-medium">' + r.username + '</span></p>' +
+                '</div>';
+        }
+    })
+    .catch(function() { document.getElementById('imageDetail').innerHTML = '<div class="p-6 text-center"><p class="text-red-500">Gagal memuat gambar</p></div>'; });
+});
+
+// Edit gambar
+document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.edit-gambar-btn');
+    if (!btn) return;
+    var id = btn.getAttribute('data-gambar-id');
+    fetch('api.php?action=get_image_data&id=' + id)
+    .then(function(r) { return r.json(); })
+    .then(function(r) {
+        if (r.error) { alert(r.error); return; }
+        document.getElementById('editId').value = r.id;
+        document.getElementById('editJudul').value = r.judul;
+        document.getElementById('editKeterangan').value = r.keterangan;
+        var img = document.getElementById('editCurrentImage');
+        img.src = 'img_view.php?id=' + r.id;
+        img.classList.remove('hidden');
+        document.querySelector('.previewContainerEdit')?.classList.add('hidden');
+        openModal('editModal');
+    })
+    .catch(function() { alert('Gagal memuat data gambar'); });
+});
+
+// Edit form submit
+document.getElementById('editForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var fd = new FormData(this);
+    fd.append('action', 'update');
+    fetch('api.php', {
+        method: 'POST',
+        body: fd
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(r) {
+        alert(r.message);
+        if (r.status === 'success') location.reload();
+    })
+    .catch(function() { alert('Error'); });
 });
 </script>
 </body>
