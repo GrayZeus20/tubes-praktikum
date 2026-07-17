@@ -335,19 +335,19 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
 
 <!-- Bottom Nav (Mobile) -->
 <nav class="fixed bottom-0 w-full flex justify-around py-2 bg-surface-container-lowest border-t border-outline-variant/30 md:hidden z-50">
-    <button id="navHome" class="flex flex-col items-center p-1 text-primary" onclick="showSection('homeSection'); setActiveMobile(this);">
+    <button id="navHome" class="flex flex-col items-center p-1 text-primary">
         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">home</span>
         <span class="text-[10px] font-medium">Explore</span>
     </button>
-    <button id="navFavorite" class="flex flex-col items-center p-1 text-on-surface-variant" onclick="showSection('favoriteSection'); setActiveMobile(this);">
+    <button id="navFavorite" class="flex flex-col items-center p-1 text-on-surface-variant">
         <span class="material-symbols-outlined">favorite</span>
         <span class="text-[10px] font-medium">Favorites</span>
     </button>
-    <button id="navUpload" class="flex flex-col items-center p-1 text-on-surface-variant" onclick="showSection('newSection'); setActiveMobile(this);">
+    <button id="navUpload" class="flex flex-col items-center p-1 text-on-surface-variant">
         <span class="material-symbols-outlined">add_box</span>
         <span class="text-[10px] font-medium">Upload</span>
     </button>
-    <button id="navProfile" class="flex flex-col items-center p-1 text-on-surface-variant" onclick="showSection('profileSection'); setActiveMobile(this);">
+    <button id="navProfile" class="flex flex-col items-center p-1 text-on-surface-variant">
         <span class="material-symbols-outlined">person</span>
         <span class="text-[10px] font-medium">Profile</span>
     </button>
@@ -534,7 +534,17 @@ window.addEventListener('scroll', function() {
 scrollBtn.addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
 // Updated Nav Clicks
-document.getElementById('homeLink').addEventListener('click', function(e) { e.preventDefault(); navigateTo('homeSection', this); });
+function navigateTo(sectionId, el) {
+    showSection(sectionId);
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('nav-active', 'border-b-2', 'border-primary', 'text-primary');
+        link.classList.add('text-on-surface-variant');
+    });
+    el.classList.add('nav-active', 'border-b-2', 'border-primary', 'text-primary');
+    el.classList.remove('text-on-surface-variant');
+}
+
+document.getElementById('homeLink').addEventListener('click', function(e) { e.preventDefault(); navigateTo('homeSection', document.getElementById('homeLink2')); });
 document.getElementById('homeLink2').addEventListener('click', function(e) { e.preventDefault(); navigateTo('homeSection', this); });
 
 document.getElementById('profileLinkNav').addEventListener('click', function(e) { 
@@ -554,34 +564,6 @@ document.getElementById('newLink')?.addEventListener('click', function(e) {
     <?php if ($username): ?> navigateTo('newSection', this);
     <?php else: ?> openModal('loginModal'); <?php endif; ?>
 });
-
-// Mobile Nav updates
-document.getElementById('navHome')?.addEventListener('click', function(e) { e.preventDefault(); navigateTo('homeSection', this); setActiveMobile(this); });
-document.getElementById('navFavorite')?.addEventListener('click', function(e) { 
-    e.preventDefault(); 
-    <?php if ($username): ?> navigateTo('favoriteSection', this); setActiveMobile(this);
-    <?php else: ?> openModal('loginModal'); <?php endif; ?>
-});
-document.getElementById('navUpload')?.addEventListener('click', function(e) { 
-    e.preventDefault(); 
-    <?php if ($username): ?> navigateTo('newSection', this); setActiveMobile(this);
-    <?php else: ?> openModal('loginModal'); <?php endif; ?>
-});
-document.getElementById('navProfile')?.addEventListener('click', function(e) { 
-    e.preventDefault(); 
-    <?php if ($username): ?> navigateTo('profileSection', this); setActiveMobile(this);
-    <?php else: ?> openModal('loginModal'); <?php endif; ?>
-});
-
-function navigateTo(sectionId, el) {
-    showSection(sectionId);
-    // Remove nav-active from all desktop links
-    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('nav-active', 'border-b-2', 'border-primary', 'text-primary'));
-    // Add to clicked if it's a desktop link
-    if (el.classList.contains('nav-link')) {
-        el.classList.add('nav-active', 'border-b-2', 'border-primary', 'text-primary');
-    }
-}
 
 // Favorite toggle
 document.addEventListener('click', function(e) {
