@@ -3,10 +3,6 @@ session_start();
 include "koneksi.php";
 
 $username = $_SESSION['username'] ?? null;
-$flash = $_SESSION['flash'] ?? null;
-$flashType = $_SESSION['flash_type'] ?? 'error';
-unset($_SESSION['flash']);
-unset($_SESSION['flash_type']);
 $upload_error = null;
 
 // Upload handler
@@ -194,9 +190,9 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
                 <button id="newLink" class="flex items-center justify-center w-9 h-9 rounded-full bg-primary text-white hover:opacity-90 transition-opacity">
                     <span class="material-symbols-outlined text-lg">add</span>
                 </button>
-                <a href="auth.php?action=logout" onclick="return confirm('Logout?')" class="flex items-center justify-center w-9 h-9 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-red-500 hover:text-white transition-all">
+                <button id="logoutBtn" class="flex items-center justify-center w-9 h-9 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-red-500 hover:text-white transition-all" title="Logout">
                     <span class="material-symbols-outlined text-lg">logout</span>
-                </a>
+                </button>
             <?php else: ?>
                 <button onclick="openModal('loginModal')" class="text-sm font-medium text-primary px-4 py-1.5 hover:opacity-80 transition-opacity">Sign In</button>
                 <button onclick="openModal('registerModal')" class="text-sm font-medium bg-primary text-white px-4 py-1.5 rounded-lg hover:opacity-90 transition-opacity">Register</button>
@@ -368,7 +364,7 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
-            <form action="auth.php?action=login" method="POST" class="space-y-4">
+            <form id="loginForm" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-on-surface mb-1">Username</label>
                     <input type="text" name="username" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" required>
@@ -383,7 +379,7 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
                         </button>
                     </div>
                 </div>
-                <button type="submit" class="w-full h-10 bg-primary text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">Sign In</button>
+                <button type="submit" id="loginBtn" class="w-full h-10 bg-primary text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">Sign In</button>
             </form>
             <p class="text-center text-sm text-on-surface-variant mt-4">
                 Don't have an account? <a href="javascript:void(0)" class="text-primary font-medium hover:underline" onclick="closeModal('loginModal');openModal('registerModal')">Register</a>
@@ -403,7 +399,7 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
-            <form action="auth.php?action=register" method="POST" class="space-y-4">
+            <form id="registerForm" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-on-surface mb-1">Username</label>
                     <input type="text" name="username" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" required>
@@ -418,7 +414,7 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
                         </button>
                     </div>
                 </div>
-                <button type="submit" class="w-full h-10 bg-primary text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">Register</button>
+                <button type="submit" id="registerBtn" class="w-full h-10 bg-primary text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">Register</button>
             </form>
             <p class="text-center text-sm text-on-surface-variant mt-4">
                 Already have an account? <a href="javascript:void(0)" class="text-primary font-medium hover:underline" onclick="closeModal('registerModal');openModal('loginModal')">Sign In</a>
@@ -470,12 +466,6 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
 <div id="toastContainer" class="fixed top-20 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
 <script>
-<?php if ($flash): ?>
-    window.addEventListener('DOMContentLoaded', () => {
-        showToast('<?=htmlspecialchars($flash)?>', '<?=$flashType?>');
-    });
-<?php endif; ?>
-
 // Toast notification system
 function showToast(message, type) {
     type = type || 'info';
@@ -746,21 +736,36 @@ document.addEventListener('click', function(e) {
     .catch(function() { showToast('Gagal memuat data gambar', 'error'); });
 });
 
-// Edit form submit
-document.getElementById('editForm').addEventListener('submit', function(e) {
+// AJAX Login & Register
+document.getElementById('loginForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    var fd = new FormData(this);
-    fd.append('action', 'update');
-    fetch('api.php', {
-        method: 'POST',
-        body: fd
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(r) {
-        showToast(r.message, r.status === 'success' ? 'success' : 'error');
-        if (r.status === 'success') setTimeout(function(){location.reload()}, 1500);
-    })
-    .catch(function() { showToast('Error', 'error'); });
+    fetch('auth.php?action=login', { method: 'POST', body: new FormData(this) })
+    .then(r => r.json())
+    .then(r => {
+        showToast(r.message, r.status);
+        if (r.status === 'success') setTimeout(() => location.reload(), 1500);
+    });
+});
+
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    fetch('auth.php?action=register', { method: 'POST', body: new FormData(this) })
+    .then(r => r.json())
+    .then(r => {
+        showToast(r.message, r.status);
+        if (r.status === 'success') setTimeout(() => location.reload(), 1500);
+    });
+});
+
+// Logout handler
+document.getElementById('logoutBtn').addEventListener('click', function() {
+    if (!confirm('Logout?')) return;
+    fetch('auth.php?action=logout')
+    .then(r => r.json())
+    .then(r => {
+        showToast(r.message, 'success');
+        setTimeout(() => location.reload(), 1500);
+    });
 });
 
 // Loading status simulation
