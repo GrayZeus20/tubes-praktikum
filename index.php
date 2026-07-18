@@ -773,7 +773,7 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
 });
 
 // Logout handler
-document.getElementById('logoutBtn').addEventListener('click', function() {
+document.getElementById('logoutBtn')?.addEventListener('click', function() {
     if (!confirm('Logout?')) return;
     fetch('auth.php?action=logout')
     .then(r => r.json())
