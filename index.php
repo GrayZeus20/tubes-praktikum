@@ -8,14 +8,18 @@ $upload_error = null;
 // Upload handler
 if (isset($_POST['input']) && $username && isset($_FILES['gambar'])) {
     $f = $_FILES['gambar'];
-    if ($f['error'] === UPLOAD_ERR_OK && $f['size'] < 2048000 && in_array($f['type'], ['image/jpeg', 'image/png'])) {
-        $image = file_get_contents($f['tmp_name']);
-        $stmt = $koneksi->prepare("INSERT INTO tb_gambar (gambar, username, nama_gambar, tipe_gambar, ukuran_gambar, keterangan, judul) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssiss", $image, $username, $f['name'], $f['type'], $f['size'], $_POST['keterangan'], $_POST['judul']);
-        $stmt->execute();
-        $stmt->close();
-        header("Location: index.php");
-        exit;
+    if ($f['error'] === UPLOAD_ERR_OK && $f['size'] < 2048000) {
+        $check = getimagesize($f['tmp_name']);
+        if ($check !== false && in_array($check['mime'], ['image/jpeg', 'image/png'])) {
+            $image = file_get_contents($f['tmp_name']);
+            $stmt = $koneksi->prepare("INSERT INTO tb_gambar (gambar, username, nama_gambar, tipe_gambar, ukuran_gambar, keterangan, judul) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("ssssiss", $image, $username, $f['name'], $f['type'], $f['size'], $_POST['keterangan'], $_POST['judul']);
+            $stmt->execute();
+            $stmt->close();
+            header("Location: index.php");
+            exit;
+        }
+        $upload_error = 'Ukuran maksimal 2MB, format JPEG/PNG';
     } else {
         $upload_error = 'Ukuran maksimal 2MB, format JPEG/PNG';
     }
@@ -739,14 +743,22 @@ document.addEventListener('click', function(e) {
 });
 
 // AJAX Login & Register
+function checkSessionAndReload() {
+    fetch('auth.php?action=check_session').then(r => r.json()).then(r => {
+        if (r.username) location.reload();
+        else { showToast('Session tidak tersimpan, coba lagi', 'error'); }
+    }).catch(() => { location.reload(); });
+}
+
 document.getElementById('loginForm').addEventListener('submit', function(e) {
     e.preventDefault();
     fetch('auth.php?action=login', { method: 'POST', body: new FormData(this) })
     .then(r => r.json())
     .then(r => {
         showToast(r.message, r.status);
-        if (r.status === 'success') setTimeout(() => location.reload(), 1500);
-    });
+        if (r.status === 'success') setTimeout(checkSessionAndReload, 1000);
+    })
+    .catch(function() { showToast('Gagal menghubungi server', 'error'); });
 });
 
 document.getElementById('registerForm').addEventListener('submit', function(e) {
@@ -755,8 +767,9 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
     .then(r => r.json())
     .then(r => {
         showToast(r.message, r.status);
-        if (r.status === 'success') setTimeout(() => location.reload(), 1500);
-    });
+        if (r.status === 'success') setTimeout(checkSessionAndReload, 1000);
+    })
+    .catch(function() { showToast('Gagal menghubungi server', 'error'); });
 });
 
 // Logout handler
@@ -766,8 +779,9 @@ document.getElementById('logoutBtn').addEventListener('click', function() {
     .then(r => r.json())
     .then(r => {
         showToast(r.message, 'success');
-        setTimeout(() => location.reload(), 1500);
-    });
+        if (r.status === 'success') setTimeout(() => location.reload(), 1500);
+    })
+    .catch(function() { showToast('Gagal logout', 'error'); });
 });
 
 // Loading status simulation

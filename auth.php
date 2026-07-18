@@ -19,6 +19,8 @@ switch ($action) {
             } else {
                 echo json_encode(['status' => 'error', 'message' => 'Username atau password salah']);
             }
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Method not allowed']);
         }
         exit;
 
@@ -34,7 +36,13 @@ switch ($action) {
                 echo json_encode(['status' => 'error', 'message' => 'Gagal daftar: ' . $stmt->error]);
             }
             $stmt->close();
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Method not allowed']);
         }
+        exit;
+
+    case 'check_session':
+        echo json_encode(['status' => 'success', 'username' => $_SESSION['username'] ?? null]);
         exit;
 
     case 'logout':
