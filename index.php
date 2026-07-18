@@ -784,6 +784,23 @@ document.getElementById('logoutBtn')?.addEventListener('click', function() {
     .catch(function() { showToast('Gagal logout', 'error'); });
 });
 
+// Edit form submit
+document.getElementById('editForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var fd = new FormData(this);
+    fd.append('action', 'update');
+    fetch('api.php', { method: 'POST', body: fd })
+    .then(r => r.json())
+    .then(r => {
+        showToast(r.message, r.status);
+        if (r.status === 'success') {
+            closeModal('editModal');
+            setTimeout(() => location.reload(), 1500);
+        }
+    })
+    .catch(() => showToast('Gagal mengedit gambar', 'error'));
+});
+
 // Loading status simulation
 (function() {
     var status = document.getElementById('loadingStatus');
