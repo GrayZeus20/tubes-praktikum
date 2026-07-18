@@ -14,8 +14,11 @@ switch ($action) {
             $stmt->close();
             if ($row && password_verify($_POST['password'], $row['password'])) {
                 $_SESSION['username'] = $_POST['username'];
+                $_SESSION['flash'] = 'Login berhasil!';
+                $_SESSION['flash_type'] = 'success';
             } else {
                 $_SESSION['flash'] = 'Username atau password salah';
+                $_SESSION['flash_type'] = 'error';
             }
         }
         break;
@@ -26,8 +29,11 @@ switch ($action) {
             $stmt->bind_param("ss", $_POST['username'], $hash);
             if ($stmt->execute()) {
                 $_SESSION['username'] = $_POST['username'];
+                $_SESSION['flash'] = 'Akun berhasil dibuat!';
+                $_SESSION['flash_type'] = 'success';
             } else {
                 $_SESSION['flash'] = 'Gagal daftar: ' . $stmt->error;
+                $_SESSION['flash_type'] = 'error';
             }
             $stmt->close();
         }

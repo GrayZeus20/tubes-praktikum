@@ -4,7 +4,9 @@ include "koneksi.php";
 
 $username = $_SESSION['username'] ?? null;
 $flash = $_SESSION['flash'] ?? null;
+$flashType = $_SESSION['flash_type'] ?? 'error';
 unset($_SESSION['flash']);
+unset($_SESSION['flash_type']);
 $upload_error = null;
 
 // Upload handler
@@ -207,12 +209,6 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
 
     <!-- Home Section -->
     <div id="homeSection">
-        <div class="flex items-center gap-2 overflow-x-auto pb-4 mb-4 no-scrollbar">
-            <button class="px-4 py-1.5 text-sm font-medium bg-primary text-white rounded-full whitespace-nowrap">All Media</button>
-            <button class="px-4 py-1.5 text-sm font-medium bg-surface-container-high text-on-surface-variant rounded-full whitespace-nowrap hover:bg-surface-container-highest transition-colors">Photography</button>
-            <button class="px-4 py-1.5 text-sm font-medium bg-surface-container-high text-on-surface-variant rounded-full whitespace-nowrap hover:bg-surface-container-highest transition-colors">Digital Art</button>
-            <button class="px-4 py-1.5 text-sm font-medium bg-surface-container-high text-on-surface-variant rounded-full whitespace-nowrap hover:bg-surface-container-highest transition-colors">Abstract</button>
-        </div>
         <div class="masonry-grid"><?php renderCards($images, 'home', $username, $favoritedIds); ?></div>
         <div id="loadingStatus" class="flex justify-center py-12">
             <div class="flex flex-col items-center gap-2">
@@ -474,6 +470,12 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
 <div id="toastContainer" class="fixed top-20 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
 <script>
+<?php if ($flash): ?>
+    window.addEventListener('DOMContentLoaded', () => {
+        showToast('<?=htmlspecialchars($flash)?>', '<?=$flashType?>');
+    });
+<?php endif; ?>
+
 // Toast notification system
 function showToast(message, type) {
     type = type || 'info';
@@ -679,9 +681,12 @@ document.addEventListener('click', function(e) {
     .then(function(r) {
         var container = document.getElementById('imageDetail');
         if (r.error) {
-            container.innerHTML = '<div class="p-6 text-center"><p class="text-red-500">' + r.error + '</p></div>';
+            container.innerHTML = '<div class="p-6 text-center"><p class="text-red-500">' + r.error.replace(/</g, "&lt;") + '</p></div>';
         } else {
             var favHtml = parseInt(r.fav_count) > 0 ? ' <span class="text-red-500 text-sm">♥ ' + r.fav_count + '</span>' : '';
+            var safeJudul = r.judul.replace(/</g, "&lt;");
+            var safeKet = r.keterangan.replace(/</g, "&lt;");
+            var safeUser = r.username.replace(/</g, "&lt;");
             container.innerHTML =
                 '<div class="p-4 border-b border-outline-variant/30">' +
                     '<button class="text-sm text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1" onclick="showSection(\'homeSection\')">' +
@@ -690,9 +695,9 @@ document.addEventListener('click', function(e) {
                 '</div>' +
                 '<div class="p-6 text-center">' +
                     '<img src="img_view.php?id=' + r.id + '" class="max-h-[70vh] mx-auto rounded-lg object-contain"/>' +
-                    '<h3 class="text-xl font-bold mt-4">' + r.judul + favHtml + '</h3>' +
-                    '<p class="text-on-surface-variant mt-2">' + r.keterangan + '</p>' +
-                    '<p class="text-sm text-on-surface-variant mt-3">by <span class="text-primary font-medium">' + r.username + '</span></p>' +
+                    '<h3 class="text-xl font-bold mt-4">' + safeJudul + favHtml + '</h3>' +
+                    '<p class="text-on-surface-variant mt-2">' + safeKet + '</p>' +
+                    '<p class="text-sm text-on-surface-variant mt-3">by <span class="text-primary font-medium">' + safeUser + '</span></p>' +
                 '</div>';
         }
     })
@@ -707,7 +712,7 @@ document.addEventListener('click', function(e) {
     fetch('api.php?action=get_image_data&id=' + id)
     .then(function(r) { return r.json(); })
     .then(function(r) {
-        if (r.error) { alert(r.error); return; }
+        if (r.error) { showToast(r.error, 'error'); return; }
         document.getElementById('editId').value = r.id;
         document.getElementById('editJudul').value = r.judul;
         document.getElementById('editKeterangan').value = r.keterangan;
@@ -717,7 +722,7 @@ document.addEventListener('click', function(e) {
         document.querySelector('.previewContainerEdit')?.classList.add('hidden');
         openModal('editModal');
     })
-    .catch(function() { alert('Gagal memuat data gambar'); });
+    .catch(function() { showToast('Gagal memuat data gambar', 'error'); });
 });
 
 // Edit form submit
