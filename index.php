@@ -186,9 +186,10 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
             <a href="#" id="profileLinkNav" class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors nav-link">Profile</a>
         </div>
         <div class="flex items-center gap-3">
-            <form action="index.php" method="get" class="relative hidden sm:block">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg pointer-events-none">search</span>
-                <input type="text" name="cari" value="<?=htmlspecialchars($search)?>" placeholder="Search..." class="h-9 pl-9 pr-3 text-sm bg-surface-container-low border-none rounded-full focus:ring-2 focus:ring-primary/30 w-48 lg:w-64 transition-all"/>
+            <form action="index.php" method="get" class="relative hidden sm:block" role="search">
+                <label for="searchInput" class="sr-only">Search images</label>
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg pointer-events-none" aria-hidden="true">search</span>
+                <input type="text" id="searchInput" name="cari" value="<?=htmlspecialchars($search)?>" placeholder="Search..." class="h-9 pl-9 pr-3 text-sm bg-surface-container-low border-none rounded-full focus:ring-2 focus:ring-primary/30 w-48 lg:w-64 transition-all"/>
             </form>
             <?php if ($username): ?>
                 <button id="newLink" class="flex items-center justify-center w-9 h-9 rounded-full bg-primary text-white hover:opacity-90 transition-opacity">
@@ -294,19 +295,19 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
                 <?php endif; ?>
                 <form action="" method="POST" enctype="multipart/form-data" class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-on-surface mb-1">Image</label>
+                        <label for="uploadGambar" class="block text-sm font-medium text-on-surface mb-1">Image</label>
                         <input type="file" name="gambar" class="block w-full text-sm text-on-surface file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-white hover:file:opacity-90" id="uploadGambar" required onchange="previewImage(this)">
                         <div class="mt-2 preview-wrap hidden">
                             <img src="#" alt="Preview" class="max-h-48 rounded-lg border border-outline-variant"/>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-on-surface mb-1">Title</label>
-                        <input type="text" name="judul" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" required>
+                        <label for="uploadJudul" class="block text-sm font-medium text-on-surface mb-1">Title</label>
+                        <input type="text" name="judul" id="uploadJudul" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" required>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-on-surface mb-1">Description</label>
-                        <textarea name="keterangan" class="w-full px-3 py-2 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" rows="3" required></textarea>
+                        <label for="uploadKet" class="block text-sm font-medium text-on-surface mb-1">Description</label>
+                        <textarea name="keterangan" id="uploadKet" class="w-full px-3 py-2 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" rows="3" required></textarea>
                     </div>
                     <button type="submit" name="input" class="w-full h-10 bg-primary text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">Upload</button>
                 </form>
@@ -370,13 +371,13 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
             </div>
             <form id="loginForm" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-on-surface mb-1">Username</label>
-                    <input type="text" name="username" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" required>
+                    <label for="login-username" class="block text-sm font-medium text-on-surface mb-1">Username</label>
+                    <input type="text" id="login-username" name="username" autocomplete="username" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" required>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-on-surface mb-1">Password</label>
+                    <label for="loginPassword" class="block text-sm font-medium text-on-surface mb-1">Password</label>
                     <div class="relative">
-                        <input type="password" name="password" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" id="loginPassword" required>
+                        <input type="password" name="password" autocomplete="current-password" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" id="loginPassword" required>
                         <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors" onclick="togglePassword('loginPassword', this)">
                             <svg class="w-5 h-5 show-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                             <svg class="w-5 h-5 hide-icon hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
@@ -405,13 +406,13 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
             </div>
             <form id="registerForm" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-on-surface mb-1">Username</label>
-                    <input type="text" name="username" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" required>
+                    <label for="reg-username" class="block text-sm font-medium text-on-surface mb-1">Username</label>
+                    <input type="text" id="reg-username" name="username" autocomplete="username" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" required>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-on-surface mb-1">Password</label>
+                    <label for="registerPassword" class="block text-sm font-medium text-on-surface mb-1">Password</label>
                     <div class="relative">
-                        <input type="password" name="password" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" id="registerPassword" required>
+                        <input type="password" name="password" autocomplete="new-password" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" id="registerPassword" required>
                         <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors" onclick="togglePassword('registerPassword', this)">
                             <svg class="w-5 h-5 show-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                             <svg class="w-5 h-5 hide-icon hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
@@ -444,11 +445,11 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
                     <img id="editCurrentImage" src="#" alt="Current" class="max-h-40 rounded-lg border border-outline-variant hidden mx-auto"/>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-on-surface mb-1">Title</label>
+                    <label for="editJudul" class="block text-sm font-medium text-on-surface mb-1">Title</label>
                     <input type="text" class="w-full h-10 px-3 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" id="editJudul" name="judul" required>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-on-surface mb-1">Description</label>
+                    <label for="editKeterangan" class="block text-sm font-medium text-on-surface mb-1">Description</label>
                     <textarea class="w-full px-3 py-2 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" id="editKeterangan" name="keterangan" rows="3" required></textarea>
                 </div>
                 <div>
