@@ -178,7 +178,7 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
     <div class="flex items-center justify-between h-full px-4 md:px-margin-x max-w-container-max mx-auto">
         <a href="#" id="homeLink" class="flex items-center gap-2 nav-link">
             <span class="material-symbols-outlined text-primary text-2xl">grid_view</span>
-            <span class="font-bold text-lg text-primary hidden sm:inline">Lumina</span>
+            <span class="font-bold text-lg text-primary">Lumina</span>
         </a>
         <div class="hidden md:flex items-center gap-6">
             <a href="#" id="homeLink2" class="text-sm font-medium text-primary border-b-2 border-primary pb-0.5 nav-link">Explore</a>
