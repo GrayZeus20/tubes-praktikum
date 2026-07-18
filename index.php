@@ -453,8 +453,8 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
                     <textarea class="w-full px-3 py-2 text-sm border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none" id="editKeterangan" name="keterangan" rows="3" required></textarea>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-on-surface mb-1">New Image (optional)</label>
-                    <input type="file" class="block w-full text-sm text-on-surface file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-white hover:file:opacity-90" name="gambar" onchange="previewImage(this)">
+                    <label for="editGambar" class="block text-sm font-medium text-on-surface mb-1">New Image (optional)</label>
+                    <input type="file" id="editGambar" class="block w-full text-sm text-on-surface file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-white hover:file:opacity-90" name="gambar" onchange="previewImage(this)">
                     <div class="mt-2 previewContainerEdit hidden">
                         <img id="previewImgEdit" src="#" alt="Preview" class="max-h-40 rounded-lg border border-outline-variant"/>
                     </div>
