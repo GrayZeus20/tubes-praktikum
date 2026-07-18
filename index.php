@@ -609,6 +609,8 @@ document.getElementById('navProfile').addEventListener('click', function(e) {
     <?php if ($username): ?> navigateTo('profileSection', document.getElementById('profileLinkNav')); setActiveMobile(this);
     <?php else: ?> openModal('loginModal'); <?php endif; ?>
 });
+// Favorite toggle
+document.addEventListener('click', function(e) {
     var btn = e.target.closest('.favorite-btn');
     if (!btn) return;
     var id = btn.getAttribute('data-id');
