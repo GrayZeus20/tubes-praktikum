@@ -219,7 +219,7 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
     </div>
 
     <!-- Profile Section -->
-    <div id="profileSection" class="section hidden">
+    <div id="profileSection" class="hidden">
         <div class="max-w-3xl mx-auto">
             <div class="flex flex-col items-center mb-6">
                 <div class="w-20 h-20 rounded-full bg-surface-container-high flex items-center justify-center mb-3">
@@ -497,14 +497,23 @@ function showToast(message, type) {
 
 // Section navigation
 function showSection(id) {
-    document.querySelectorAll('.section, #homeSection, #profileSection, #favoriteSection, #imageSection, #newSection').forEach(function(el) {
-        if (el.id === id) {
+    var allSections = ['#homeSection', '#profileSection', '#favoriteSection', '#imageSection', '#newSection'];
+    allSections.forEach(function(sel) {
+        var el = document.querySelector(sel);
+        if (!el) return;
+        if (sel.replace('#', '') === id) {
             el.classList.remove('hidden');
-        } else if (el.classList.contains('hidden') === false && (el.id.endsWith('Section') || el.id === 'homeSection')) {
+        } else {
             el.classList.add('hidden');
         }
     });
 }
+
+// Ensure homeSection is visible on every page load
+document.addEventListener('DOMContentLoaded', function() {
+    showSection('homeSection');
+    setActiveMobile(document.getElementById('navHome'));
+});
 
 function setActiveMobile(el) {
     document.querySelectorAll('nav button').forEach(function(b) {
@@ -596,8 +605,20 @@ document.getElementById('newLink')?.addEventListener('click', function(e) {
     <?php else: ?> openModal('loginModal'); <?php endif; ?>
 });
 
-// Favorite toggle
-document.addEventListener('click', function(e) {
+// Add nav click listeners for mobile
+document.getElementById('navHome').addEventListener('click', function(e) { navigateTo('homeSection', document.getElementById('homeLink2')); setActiveMobile(this); });
+document.getElementById('navFavorite').addEventListener('click', function(e) { 
+    <?php if ($username): ?> navigateTo('favoriteSection', document.getElementById('favoriteLinkNav')); setActiveMobile(this);
+    <?php else: ?> openModal('loginModal'); <?php endif; ?>
+});
+document.getElementById('navUpload').addEventListener('click', function(e) { 
+    <?php if ($username): ?> navigateTo('newSection', document.getElementById('newLink')); setActiveMobile(this);
+    <?php else: ?> openModal('loginModal'); <?php endif; ?>
+});
+document.getElementById('navProfile').addEventListener('click', function(e) { 
+    <?php if ($username): ?> navigateTo('profileSection', document.getElementById('profileLinkNav')); setActiveMobile(this);
+    <?php else: ?> openModal('loginModal'); <?php endif; ?>
+});
     var btn = e.target.closest('.favorite-btn');
     if (!btn) return;
     var id = btn.getAttribute('data-id');

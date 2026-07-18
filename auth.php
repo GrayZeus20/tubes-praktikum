@@ -43,9 +43,5 @@ switch ($action) {
         break;
 }
 
-$url = $_SERVER['HTTP_REFERER'] ?? 'index.php';
-if (strpos($url, 'auth.php') !== false || strpos($url, 'login') !== false) {
-    $url = 'index.php';
-}
-header("Location: $url");
+header("Location: index.php");
 exit;
