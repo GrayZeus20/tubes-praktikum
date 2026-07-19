@@ -245,10 +245,6 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
                     <span class="material-symbols-outlined text-lg">grid_on</span>
                     My Uploads
                 </button>
-                <button class="pb-3 px-4 text-sm font-medium text-on-surface-variant flex items-center gap-2">
-                    <span class="material-symbols-outlined text-lg">favorite</span>
-                    Favorites
-                </button>
             </div>
             <div class="masonry-grid">
                 <?php
@@ -281,6 +277,18 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
             ?>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="hidden md:block w-full border-t border-outline-variant/30 bg-surface-container-lowest mt-12">
+        <div class="px-4 md:px-margin-x max-w-container-max mx-auto py-8 flex justify-center items-center gap-6">
+            <p class="text-sm text-on-surface-variant">&copy; 2024 Lumina. All rights reserved.</p>
+            <div class="flex gap-4 text-sm text-on-surface-variant">
+                <a href="#" class="hover:text-primary transition-colors">Privacy</a>
+                <a href="#" class="hover:text-primary transition-colors">Terms</a>
+                <a href="#" class="hover:text-primary transition-colors">Contact</a>
+            </div>
+        </div>
+    </footer>
 
     <!-- Image Detail Section -->
     <div id="imageSection" class="hidden">
@@ -322,20 +330,17 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
 </main>
 
 <!-- Footer -->
-<footer class="hidden md:block w-full border-t border-outline-variant/30 bg-surface-container-lowest">
-    <div class="px-4 md:px-margin-x max-w-container-max mx-auto py-8 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary">grid_view</span>
-            <span class="font-bold text-primary">Lumina</span>
+    <!-- Footer -->
+    <footer class="hidden md:block w-full border-t border-outline-variant/30 bg-surface-container-lowest">
+        <div class="px-4 md:px-margin-x max-w-container-max mx-auto py-8 flex justify-center items-center gap-6">
+            <p class="text-sm text-on-surface-variant">&copy; 2024 Lumina. All rights reserved.</p>
+            <div class="flex gap-4 text-sm text-on-surface-variant">
+                <a href="#" class="hover:text-primary transition-colors">Privacy</a>
+                <a href="#" class="hover:text-primary transition-colors">Terms</a>
+                <a href="#" class="hover:text-primary transition-colors">Contact</a>
+            </div>
         </div>
-        <p class="text-sm text-on-surface-variant">&copy; 2024 Lumina. All rights reserved.</p>
-        <div class="flex gap-4 text-sm text-on-surface-variant">
-            <a href="#" class="hover:text-primary transition-colors">Privacy</a>
-            <a href="#" class="hover:text-primary transition-colors">Terms</a>
-            <a href="#" class="hover:text-primary transition-colors">Contact</a>
-        </div>
-    </div>
-</footer>
+    </footer>
 
 <!-- Scroll to Top -->
 <button id="scrollTopBtn" class="fixed bottom-6 right-6 w-11 h-11 bg-primary text-white rounded-xl shadow-lg flex items-center justify-center z-40 opacity-0 invisible transition-all hover:scale-110 active:scale-95">
