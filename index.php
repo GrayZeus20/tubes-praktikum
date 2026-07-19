@@ -95,8 +95,8 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
         }
 
         echo "<div class='masonry-item group relative bg-surface-container-lowest border border-outline-variant/50 rounded-xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 ease-out'>
-                <div class='relative overflow-hidden cursor-pointer imageLink' data-id='$id'>
-                    <img src='$imgSrc' class='w-full object-cover transition-transform duration-700 group-hover:scale-110' loading='lazy'/>
+                <div class='img-wrap relative overflow-hidden cursor-pointer imageLink' data-id='$id'>
+                    <img src='$imgSrc' class='w-full h-full object-cover transition-transform duration-700 group-hover:scale-110' loading='lazy'/>
                     <div class='absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-5'>
                         <div class='flex justify-end transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500'>
                             $btn
@@ -149,11 +149,15 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
     </script>
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .masonry-grid { columns: 2; column-gap: 16px; }
-        @media (min-width: 768px) { .masonry-grid { columns: 3; column-gap: 20px; } }
-        @media (min-width: 1024px) { .masonry-grid { columns: 4; column-gap: 24px; } }
-        .masonry-item { break-inside: avoid; margin-bottom: 16px; }
-        @media (min-width: 768px) { .masonry-item { margin-bottom: 20px; } }
+        .masonry-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        @media (min-width: 768px) { .masonry-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; } }
+        @media (min-width: 1024px) { .masonry-grid { grid-template-columns: repeat(4, 1fr); gap: 24px; } }
+        .masonry-item { break-inside: avoid; }
+        .masonry-item .img-wrap { aspect-ratio: 4/3; }
         .modal-backdrop { background: rgba(15,23,42,0.5); backdrop-filter: blur(4px); }
         .auth-card-blur { backdrop-filter: blur(16px); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
