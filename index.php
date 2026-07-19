@@ -109,19 +109,17 @@ function renderFavoriteCards($result) {
         echo "<div class='gallery-card-hover group relative bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0px_4px_20px_rgba(0,0,0,0.1)]'>
                 <div class='relative overflow-hidden aspect-[4/3]'>
                     <img src='$imgSrc' class='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105' loading='lazy'/>
-                    <div class='card-overlay absolute inset-0 bg-black/40 transition-opacity duration-300 flex flex-col justify-between p-4'>
-                        <div class='flex justify-end gap-2'>
-                            <button class='delete-favorite-btn w-10 h-10 rounded-full bg-red-500/90 text-white flex items-center justify-center hover:bg-red-600 transition-colors' data-favorite-id='" . ($row['favorite_id'] ?? '') . "'>
-                                <span class='material-symbols-outlined text-[20px]'>delete</span>
+                    <div class='card-overlay absolute inset-0 bg-black/40 transition-opacity duration-300 flex flex-col justify-between p-3'>
+                        <div class='flex justify-end'>
+                            <button class='delete-favorite-btn w-8 h-8 rounded-full bg-red-500/90 text-white flex items-center justify-center hover:bg-red-600 transition-colors' data-favorite-id='" . ($row['favorite_id'] ?? '') . "'>
+                                <span class='material-symbols-outlined text-[16px]'>delete</span>
                             </button>
                         </div>
-                        <div class='flex flex-col gap-1'>
-                             <button class='w-full py-2 bg-white/90 hover:bg-white text-primary text-xs font-bold rounded-lg transition-colors imageLink' data-id='$id'>View Detail</button>
-                        </div>
+                        <button class='w-full py-1.5 bg-white/90 hover:bg-white text-primary text-[11px] font-bold rounded-lg transition-colors imageLink' data-id='$id'>View</button>
                     </div>
                 </div>
-                <div class='p-4'>
-                    <h3 class='font-label-md text-label-md text-on-surface truncate'>$judul</h3>
+                <div class='p-3'>
+                    <h3 class='font-label-sm text-label-sm text-on-surface truncate'>$judul</h3>
                 </div>
               </div>";
     }
@@ -173,20 +171,16 @@ function renderFavoriteCards($result) {
         main {
             flex: 1;
         }
-        /* Masonry Grid Styles */
-        .masonry-grid {
+/* Grid Favorites - Lebih rapat */
+        .favorites-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+        }
+        @media (min-width: 640px) {
+            .favorites-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
         }
         
-        @media (min-width: 640px) {
-            .masonry-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
-        }
-        @media (min-width: 1024px) {
-            .masonry-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
-        }
-
         .gallery-card-hover:hover .card-overlay {
             opacity: 1;
         }
@@ -307,7 +301,7 @@ function renderFavoriteCards($result) {
     <!-- Favorite Section -->
     <div id="favoriteSection" class="hidden">
         <div class="text-center mb-6"><h2 class="text-xl font-bold">Favorites</h2></div>
-        <div class="masonry-grid">
+        <div class="favorites-grid">
             <?php
             if ($username) {
                 $stmt = $koneksi->prepare("SELECT g.id, g.judul, g.keterangan, f.id as favorite_id FROM tb_gambar g INNER JOIN favorit f ON g.id = f.id_gambar WHERE f.id_user = (SELECT id_user FROM admin WHERE username = ?)");
