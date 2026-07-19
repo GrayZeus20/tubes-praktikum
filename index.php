@@ -138,16 +138,16 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
         }
         /* Masonry Grid Styles */
         .masonry-grid {
-            columns: 1;
-            column-gap: 24px;
+            columns: 2;
+            column-gap: 16px;
         }
-        @media (min-width: 640px) { .masonry-grid { columns: 2; } }
-        @media (min-width: 1024px) { .masonry-grid { columns: 3; } }
-        @media (min-width: 1280px) { .masonry-grid { columns: 4; } }
+        @media (min-width: 640px) { .masonry-grid { columns: 3; column-gap: 16px; } }
+        @media (min-width: 1024px) { .masonry-grid { columns: 4; column-gap: 16px; } }
+        @media (min-width: 1280px) { .masonry-grid { columns: 5; column-gap: 16px; } }
         
         .masonry-item {
             break-inside: avoid;
-            margin-bottom: 24px;
+            margin-bottom: 16px;
             display: inline-block;
             width: 100%;
         }
