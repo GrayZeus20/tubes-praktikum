@@ -67,8 +67,8 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
         $favColor = $isFavorited ? 'text-red-500' : 'text-white';
 
         echo "<div class='masonry-item gallery-card-hover group relative bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0px_4px_20px_rgba(0,0,0,0.1)]'>
-                <div class='relative overflow-hidden aspect-[3/4]'>
-                    <img src='$imgSrc' class='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105' loading='lazy'/>
+                <div class='relative overflow-hidden'>
+                    <img src='$imgSrc' class='w-full h-auto block transition-transform duration-500 group-hover:scale-105' loading='lazy'/>
                     <div class='card-overlay absolute inset-0 bg-black/20 transition-opacity duration-300 flex flex-col justify-between p-4'>
                         <div class='flex justify-end'>
                             <button class='favorite-btn w-10 h-10 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-colors active:scale-90' data-id='$id'>
@@ -139,15 +139,17 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
         /* Masonry Grid Styles */
         .masonry-grid {
             columns: 1;
-            column-gap: 32px;
+            column-gap: 24px;
         }
-        @media (min-width: 768px) { .masonry-grid { columns: 2; } }
+        @media (min-width: 640px) { .masonry-grid { columns: 2; } }
         @media (min-width: 1024px) { .masonry-grid { columns: 3; } }
         @media (min-width: 1280px) { .masonry-grid { columns: 4; } }
         
         .masonry-item {
             break-inside: avoid;
-            margin-bottom: 32px;
+            margin-bottom: 24px;
+            display: inline-block;
+            width: 100%;
         }
 
         .gallery-card-hover:hover .card-overlay {
