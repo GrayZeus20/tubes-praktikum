@@ -1,5 +1,8 @@
 <?php
 session_start();
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 include "koneksi.php";
 
 $username = $_SESSION['username'] ?? null;
@@ -7,21 +10,25 @@ $upload_error = null;
 
 // Upload handler
 if (isset($_POST['input']) && $username && isset($_FILES['gambar'])) {
-    $f = $_FILES['gambar'];
-    if ($f['error'] === UPLOAD_ERR_OK && $f['size'] < 2048000) {
-        $check = getimagesize($f['tmp_name']);
-        if ($check !== false && in_array($check['mime'], ['image/jpeg', 'image/png'])) {
-            $image = file_get_contents($f['tmp_name']);
-            $stmt = $koneksi->prepare("INSERT INTO tb_gambar (gambar, username, nama_gambar, tipe_gambar, ukuran_gambar, keterangan, judul) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("ssssiss", $image, $username, $f['name'], $f['type'], $f['size'], $_POST['keterangan'], $_POST['judul']);
-            $stmt->execute();
-            $stmt->close();
-            header("Location: index.php");
-            exit;
-        }
-        $upload_error = 'Ukuran maksimal 2MB, format JPEG/PNG';
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        $upload_error = 'Invalid CSRF token';
     } else {
-        $upload_error = 'Ukuran maksimal 2MB, format JPEG/PNG';
+        $f = $_FILES['gambar'];
+        if ($f['error'] === UPLOAD_ERR_OK && $f['size'] < 2048000) {
+            $check = getimagesize($f['tmp_name']);
+            if ($check !== false && in_array($check['mime'], ['image/jpeg', 'image/png'])) {
+                $image = file_get_contents($f['tmp_name']);
+                $stmt = $koneksi->prepare("INSERT INTO tb_gambar (gambar, username, nama_gambar, tipe_gambar, ukuran_gambar, keterangan, judul) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                $stmt->bind_param("ssssiss", $image, $username, $f['name'], $f['type'], $f['size'], $_POST['keterangan'], $_POST['judul']);
+                $stmt->execute();
+                $stmt->close();
+                header("Location: index.php");
+                exit;
+            }
+            $upload_error = 'Ukuran maksimal 2MB, format JPEG/PNG';
+        } else {
+            $upload_error = 'Ukuran maksimal 2MB, format JPEG/PNG';
+        }
     }
 }
 
@@ -83,8 +90,38 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
                         <div class='w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center'>
                             <span class='material-symbols-outlined text-[14px] text-on-surface-variant'>person</span>
                         </div>
-                        <span class='font-label-sm text-label-sm text-on-surface-variant'>@$owner</span>
+                        <span class='font-label-sm text-label-sm text-on-surface-variant'>$owner</span>
                     </div>
+                </div>
+              </div>";
+    }
+}
+function renderFavoriteCards($result) {
+    if ($result->num_rows === 0) {
+        echo "<div class='col-span-full text-center py-12'><p class='text-on-surface-variant text-lg'>Tidak ada gambar favorit</p></div>";
+        return;
+    }
+    while ($row = $result->fetch_assoc()) {
+        $id = htmlspecialchars($row['id']);
+        $judul = htmlspecialchars($row['judul'] ?? 'Untitled');
+        $imgSrc = "img_view.php?id=$id";
+        
+        echo "<div class='gallery-card-hover group relative bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0px_4px_20px_rgba(0,0,0,0.1)]'>
+                <div class='relative overflow-hidden aspect-[4/3]'>
+                    <img src='$imgSrc' class='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105' loading='lazy'/>
+                    <div class='card-overlay absolute inset-0 bg-black/40 transition-opacity duration-300 flex flex-col justify-between p-4'>
+                        <div class='flex justify-end gap-2'>
+                            <button class='delete-favorite-btn w-10 h-10 rounded-full bg-red-500/90 text-white flex items-center justify-center hover:bg-red-600 transition-colors' data-favorite-id='" . ($row['favorite_id'] ?? '') . "'>
+                                <span class='material-symbols-outlined text-[20px]'>delete</span>
+                            </button>
+                        </div>
+                        <div class='flex flex-col gap-1'>
+                             <button class='w-full py-2 bg-white/90 hover:bg-white text-primary text-xs font-bold rounded-lg transition-colors imageLink' data-id='$id'>View Detail</button>
+                        </div>
+                    </div>
+                </div>
+                <div class='p-4'>
+                    <h3 class='font-label-md text-label-md text-on-surface truncate'>$judul</h3>
                 </div>
               </div>";
     }
@@ -276,7 +313,7 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
                 $stmt = $koneksi->prepare("SELECT g.id, g.judul, g.keterangan, f.id as favorite_id FROM tb_gambar g INNER JOIN favorit f ON g.id = f.id_gambar WHERE f.id_user = (SELECT id_user FROM admin WHERE username = ?)");
                 $stmt->bind_param("s", $username);
                 $stmt->execute();
-                renderCards($stmt->get_result(), 'favorite', $username);
+                renderFavoriteCards($stmt->get_result());
                 $stmt->close();
             } else {
                 echo "<div class='col-span-full text-center py-12'><p class='text-on-surface-variant text-lg'>Please sign in to view favorites</p></div>";
@@ -313,6 +350,7 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
                     <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-sm mb-4"><?=$upload_error?></div>
                 <?php endif; ?>
                 <form action="" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    <input type="hidden" name="csrf_token" value="<?=$_SESSION['csrf_token']?>">
                     <div>
                         <label for="uploadGambar" class="block text-sm font-medium text-on-surface mb-1">Image</label>
                         <input type="file" name="gambar" class="block w-full text-sm text-on-surface file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-white hover:file:opacity-90" id="uploadGambar" required onchange="previewImage(this)">
@@ -638,7 +676,7 @@ document.addEventListener('click', function(e) {
     fetch('api.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'action=favorit&id=' + id
+        body: 'csrf_token=<?= $_SESSION['csrf_token'] ?>&action=favorit&id=' + id
     })
     .then(function(r) { return r.json(); })
     .then(function(r) {
@@ -671,7 +709,7 @@ document.addEventListener('click', function(e) {
     fetch('api.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'action=delete_gambar&id_gambar=' + id
+        body: 'csrf_token=<?= $_SESSION['csrf_token'] ?>&action=delete_gambar&id_gambar=' + id
     })
     .then(function(r) { return r.json(); })
     .then(function(r) {
@@ -690,7 +728,7 @@ document.addEventListener('click', function(e) {
     fetch('api.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'action=delete_favorit&id_favorite=' + id
+        body: 'csrf_token=<?= $_SESSION['csrf_token'] ?>&action=delete_favorit&id_favorite=' + id
     })
     .then(function(r) { return r.json(); })
     .then(function(r) {
@@ -825,6 +863,7 @@ document.getElementById('logoutBtn')?.addEventListener('click', function() {
 document.getElementById('editForm').addEventListener('submit', function(e) {
     e.preventDefault();
     var fd = new FormData(this);
+    fd.append('csrf_token', '<?= $_SESSION['csrf_token'] ?>');
     fd.append('action', 'update');
     fetch('api.php', { method: 'POST', body: fd })
     .then(r => r.json())
