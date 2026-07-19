@@ -119,8 +119,8 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
                         'outline-variant': '#cbd5e1',
                     },
                     spacing: {
-                        'margin-x': '64px',
-                        'container-max': '1440px',
+                        'margin-x': '4rem',
+                        'container-max': 'min(100%, 90rem)',
                     }
                 }
             }
