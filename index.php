@@ -59,53 +59,32 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
     while ($row = $result->fetch_assoc()) {
         $id = htmlspecialchars($row['id']);
         $judul = htmlspecialchars($row['judul']);
-        $ket = htmlspecialchars($row['keterangan']);
         $owner = htmlspecialchars($row['username'] ?? '');
         $imgSrc = "img_view.php?id=$id";
-        $isOwner = $currentUser && $owner === $currentUser;
         $isFavorited = in_array($row['id'], $favoritedIds);
-        $favCount = htmlspecialchars($row['fav_count'] ?? 0);
-        $btn = '';
+        $favIcon = $isFavorited ? 'favorite' : 'favorite';
+        $favFill = $isFavorited ? "'FILL' 1" : "'FILL' 0";
+        $favColor = $isFavorited ? 'text-red-500' : 'text-white';
 
-        if ($type === 'home') {
-            if ($currentUser) {
-                $heartIcon = $isFavorited ? 'favorite' : 'favorite';
-                $fill = $isFavorited ? "'FILL' 1" : "'FILL' 0";
-                $colorClass = $isFavorited ? 'text-red-500' : 'text-white';
-                $countHtml = $favCount > 0 ? "<span class='text-xs ml-0.5'>$favCount</span>" : '';
-                $favClass = $isFavorited ? 'favorited' : '';
-                $btn = "<button type='button' class='favorite-btn w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/40 transition-colors $favClass' data-id='$id'>
-                    <span class='material-symbols-outlined text-sm $colorClass' style='font-variation-settings: $fill'>$heartIcon</span>$countHtml
-                </button>";
-            }
-        } elseif ($type === 'profile') {
-            $btn = "<div class='flex gap-2'>
-                <button type='button' class='edit-gambar-btn w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/40 transition-colors' data-gambar-id='$id'>
-                    <span class='material-symbols-outlined text-sm text-white'>edit</span>
-                </button>
-                <button type='button' class='delete-gambar-btn w-9 h-9 rounded-full bg-red-500/30 backdrop-blur-sm flex items-center justify-center hover:bg-red-500/50 transition-colors' data-gambar-id='$id'>
-                    <span class='material-symbols-outlined text-sm text-white'>delete</span>
-                </button>
-            </div>";
-        } elseif ($type === 'favorite') {
-            $fid = htmlspecialchars($row['favorite_id']);
-            $btn = "<button type='button' class='delete-favorite-btn w-9 h-9 rounded-full bg-red-500/30 backdrop-blur-sm flex items-center justify-center hover:bg-red-500/50 transition-colors' data-favorite-id='$fid'>
-                <span class='material-symbols-outlined text-sm text-white'>favorite</span>
-            </button>";
-        }
-
-        echo "<div class='masonry-item group relative bg-surface-container-lowest border border-outline-variant/50 rounded-xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 ease-out'>
-                <div class='img-wrap relative overflow-hidden cursor-pointer imageLink' data-id='$id'>
-                    <img src='$imgSrc' class='w-full h-full object-cover transition-transform duration-700 group-hover:scale-110' loading='lazy'/>
-                    <div class='absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-5'>
-                        <div class='flex justify-end transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500'>
-                            $btn
+        echo "<div class='masonry-item gallery-card-hover group relative bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0px_4px_20px_rgba(0,0,0,0.1)]'>
+                <div class='relative overflow-hidden aspect-[3/4]'>
+                    <img src='$imgSrc' class='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105' loading='lazy'/>
+                    <div class='card-overlay absolute inset-0 bg-black/20 transition-opacity duration-300 flex flex-col justify-between p-4'>
+                        <div class='flex justify-end'>
+                            <button class='favorite-btn w-10 h-10 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-colors active:scale-90' data-id='$id'>
+                                <span class='material-symbols-outlined text-[20px] $favColor' style='font-variation-settings: $favFill'>favorite</span>
+                            </button>
                         </div>
                     </div>
                 </div>
-                <div class='p-4 transform transition-all duration-500 group-hover:-translate-y-1'>
-                    <h3 class='font-semibold text-sm text-on-surface truncate'>$judul</h3>
-                    <p class='text-xs text-on-surface-variant mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-500'>@$owner</p>
+                <div class='p-4 flex flex-col gap-2'>
+                    <h3 class='font-label-md text-label-md text-on-surface truncate cursor-pointer imageLink' data-id='$id'>$judul</h3>
+                    <div class='flex items-center gap-2'>
+                        <div class='w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center'>
+                            <span class='material-symbols-outlined text-[14px] text-on-surface-variant'>person</span>
+                        </div>
+                        <span class='font-label-sm text-label-sm text-on-surface-variant'>@$owner</span>
+                    </div>
                 </div>
               </div>";
     }
@@ -157,15 +136,28 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
         main {
             flex: 1;
         }
+        /* Masonry Grid Styles */
         .masonry-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
+            columns: 1;
+            column-gap: 32px;
         }
-        @media (min-width: 768px) { .masonry-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; } }
-        @media (min-width: 1024px) { .masonry-grid { grid-template-columns: repeat(4, 1fr); gap: 24px; } }
-        .masonry-item { break-inside: avoid; }
-        .masonry-item .img-wrap { aspect-ratio: 4/3; }
+        @media (min-width: 768px) { .masonry-grid { columns: 2; } }
+        @media (min-width: 1024px) { .masonry-grid { columns: 3; } }
+        @media (min-width: 1280px) { .masonry-grid { columns: 4; } }
+        
+        .masonry-item {
+            break-inside: avoid;
+            margin-bottom: 32px;
+        }
+
+        .gallery-card-hover:hover .card-overlay {
+            opacity: 1;
+        }
+
+        .card-overlay {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
         .modal-backdrop { background: rgba(15,23,42,0.5); backdrop-filter: blur(4px); }
         .auth-card-blur { backdrop-filter: blur(16px); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -181,6 +173,13 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
         .click-effect { animation: clickPop 0.25s ease-out; }
         @keyframes skeleton { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         .skeleton { background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%); background-size: 200% 100%; animation: skeleton 1.5s infinite; }
+        #imageSection .content-wrapper { display: flex; flex-direction: column; gap: 32px; }
+        @media (min-width: 1024px) {
+            #imageSection .content-wrapper { flex-direction: row; }
+            #imageSection .image-col { width: 66.666667%; }
+            #imageSection .meta-col { width: 33.333333%; position: sticky; top: 112px; height: fit-content; }
+        }
+        .tag-pill { padding: 4px 12px; background: #e6e8ea; color: #475569; border-radius: 4px; font-size: 12px; font-weight: 500; }
     </style>
 </head>
 <body class="bg-surface text-on-surface font-sans antialiased selection:bg-primary/10 selection:text-primary">
@@ -288,8 +287,20 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
 
     <!-- Image Detail Section -->
     <div id="imageSection" class="hidden">
-        <div class="max-w-4xl mx-auto">
-            <div id="imageDetail" class="bg-surface-container-lowest border border-outline-variant/50 rounded-xl overflow-hidden"></div>
+        <div id="imageDetail" class="max-w-container-max mx-auto px-4 md:px-margin-x">
+            <div class="content-wrapper">
+                <div class="image-col">
+                    <button onclick="showSection('homeSection')" class="inline-flex items-center gap-1 text-sm text-on-surface-variant hover:text-primary transition-colors mb-4">
+                        <span class="material-symbols-outlined text-lg">arrow_back</span> Back to gallery
+                    </button>
+                    <div id="detailImageWrap" class="aspect-[4/3] bg-surface-container rounded-xl overflow-hidden border border-outline-variant/50"></div>
+                </div>
+                <div class="meta-col">
+                    <div id="detailMeta" class="bg-surface-container-lowest border border-outline-variant/50 rounded-xl p-6 flex flex-col gap-5"></div>
+                </div>
+            </div>
+            <!-- Related -->
+            <div id="detailRelated" class="mt-12 mb-8"></div>
         </div>
     </div>
 
@@ -695,6 +706,10 @@ document.addEventListener('click', function(e) {
     if (!el) return;
     var id = el.getAttribute('data-id');
     showSection('imageSection');
+    document.getElementById('imageDetail').scrollTop = 0;
+    document.getElementById('detailImageWrap').innerHTML = '<div class="skeleton w-full h-full"></div>';
+    document.getElementById('detailMeta').innerHTML = '<div class="skeleton h-6 w-3/4 mb-4 rounded"></div><div class="skeleton h-4 w-full mb-2 rounded"></div><div class="skeleton h-4 w-2/3 rounded"></div>';
+
     fetch('api.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -702,29 +717,45 @@ document.addEventListener('click', function(e) {
     })
     .then(function(r) { return r.json(); })
     .then(function(r) {
-        var container = document.getElementById('imageDetail');
         if (r.error) {
-            container.innerHTML = '<div class="p-6 text-center"><p class="text-red-500">' + r.error.replace(/</g, "&lt;") + '</p></div>';
-        } else {
-            var favHtml = parseInt(r.fav_count) > 0 ? ' <span class="text-red-500 text-sm">♥ ' + r.fav_count + '</span>' : '';
-            var safeJudul = r.judul.replace(/</g, "&lt;");
-            var safeKet = r.keterangan.replace(/</g, "&lt;");
-            var safeUser = r.username.replace(/</g, "&lt;");
-            container.innerHTML =
-                '<div class="p-4 border-b border-outline-variant/30">' +
-                    '<button class="text-sm text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1" onclick="showSection(\'homeSection\')">' +
-                        '<span class="material-symbols-outlined text-lg">arrow_back</span> Back' +
-                    '</button>' +
-                '</div>' +
-                '<div class="p-6 text-center">' +
-                    '<img src="img_view.php?id=' + r.id + '" class="max-h-[70vh] mx-auto rounded-lg object-contain"/>' +
-                    '<h3 class="text-xl font-bold mt-4">' + safeJudul + favHtml + '</h3>' +
-                    '<p class="text-on-surface-variant mt-2">' + safeKet + '</p>' +
-                    '<p class="text-sm text-on-surface-variant mt-3">by <span class="text-primary font-medium">' + safeUser + '</span></p>' +
-                '</div>';
+            document.getElementById('detailImageWrap').innerHTML = '<div class="flex items-center justify-center h-full"><p class="text-red-500">' + r.error.replace(/</g, "&lt;") + '</p></div>';
+            document.getElementById('detailMeta').innerHTML = '';
+            return;
         }
+        var safeJudul = r.judul.replace(/</g, "&lt;");
+        var safeKet = r.keterangan.replace(/</g, "&lt;");
+        var safeUser = r.username.replace(/</g, "&lt;");
+        var size = r.ukuran_gambar ? (r.ukuran_gambar / 1024).toFixed(1) + ' KB' : '-';
+        var type = r.tipe_gambar || '-';
+
+        document.getElementById('detailImageWrap').innerHTML = '<img src="img_view.php?id=' + r.id + '" class="w-full h-full object-contain" alt="' + safeJudul + '"/>';
+
+        document.getElementById('detailMeta').innerHTML =
+            '<h1 class="text-2xl font-bold text-primary leading-tight">' + safeJudul + '</h1>' +
+            '<p class="text-sm text-on-surface-variant leading-relaxed">' + safeKet + '</p>' +
+            '<div class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg border border-outline-variant/30">' +
+                '<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center">' +
+                    '<span class="material-symbols-outlined text-on-surface-variant">person</span>' +
+                '</div>' +
+                '<div><p class="text-sm font-semibold text-primary">' + safeUser + '</p><p class="text-xs text-on-surface-variant">Uploader</p></div>' +
+            '</div>' +
+            '<div class="grid grid-cols-2 gap-3 py-4 border-y border-outline-variant/30">' +
+                '<div class="text-center"><p class="text-xs text-on-surface-variant uppercase tracking-wider font-bold mb-1">Favorites</p><p class="text-lg font-bold text-primary">' + (r.fav_count || 0) + '</p></div>' +
+                '<div class="text-center"><p class="text-xs text-on-surface-variant uppercase tracking-wider font-bold mb-1">Size</p><p class="text-lg font-bold text-primary">' + size + '</p></div>' +
+            '</div>' +
+            '<button class="favorite-detail-btn w-full h-11 border border-outline-variant text-primary rounded-lg flex items-center justify-center gap-2 hover:bg-surface-container-low transition-colors text-sm font-medium" data-id="' + r.id + '">' +
+                '<span class="material-symbols-outlined">favorite</span> Favorite' +
+            '</button>' +
+            '<div class="flex flex-wrap gap-2">' +
+                '<span class="tag-pill">' + type.replace('image/', '') + '</span>' +
+                '<span class="tag-pill">Art</span>' +
+                '<span class="tag-pill">Gallery</span>' +
+            '</div>';
     })
-    .catch(function() { document.getElementById('imageDetail').innerHTML = '<div class="p-6 text-center"><p class="text-red-500">Gagal memuat gambar</p></div>'; });
+    .catch(function() {
+        document.getElementById('detailImageWrap').innerHTML = '<div class="flex items-center justify-center h-full"><p class="text-red-500">Gagal memuat gambar</p></div>';
+        document.getElementById('detailMeta').innerHTML = '';
+    });
 });
 
 // Edit gambar
@@ -807,19 +838,29 @@ document.getElementById('editForm').addEventListener('submit', function(e) {
     .catch(() => showToast('Gagal mengedit gambar', 'error'));
 });
 
-// Loading status simulation
-(function() {
-    var status = document.getElementById('loadingStatus');
-    if (!status) return;
-    var count = 0;
-    var interval = setInterval(function() {
-        count++;
-        if (count === 3) {
-            clearInterval(interval);
-            status.innerHTML = '<div class="flex flex-col items-center gap-2 opacity-50"><span class="material-symbols-outlined text-4xl">image_not_supported</span><p class="text-sm text-on-surface-variant font-medium">Sudah tidak ada gambar lagi</p></div>';
-        }
-    }, 1500);
-})();
+// Refresh functions
+function refreshSections() {
+    fetch('render_cards.php?action=get_profile_html')
+        .then(r => r.text())
+        .then(html => { document.querySelector('#profileSection .masonry-grid').innerHTML = html; });
+    
+    fetch('render_cards.php?action=get_favorites_html')
+        .then(r => r.text())
+        .then(html => { document.querySelector('#favoriteSection .masonry-grid').innerHTML = html; });
+}
+
+// Update nav clicks to trigger refresh
+document.getElementById('profileLinkNav').addEventListener('click', function(e) { 
+    e.preventDefault(); 
+    <?php if ($username): ?> refreshSections(); navigateTo('profileSection', this);
+    <?php else: ?> openModal('loginModal'); <?php endif; ?>
+});
+
+document.getElementById('favoriteLinkNav').addEventListener('click', function(e) { 
+    e.preventDefault(); 
+    <?php if ($username): ?> refreshSections(); navigateTo('favoriteSection', this);
+    <?php else: ?> openModal('loginModal'); <?php endif; ?>
+});
 </script>
 </body>
 </html>

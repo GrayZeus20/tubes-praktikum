@@ -135,21 +135,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         case 'get_image_details':
             if (!isset($_POST['id'])) jsonError('ID gambar tidak ditemukan');
-
-            $stmt = $koneksi->prepare("SELECT tb_gambar.*, (SELECT COUNT(*) FROM favorit WHERE id_gambar = tb_gambar.id) as fav_count FROM tb_gambar WHERE id = ?");
+            $stmt = $koneksi->prepare("SELECT tb_gambar.id, tb_gambar.judul, tb_gambar.keterangan, tb_gambar.username, tb_gambar.tipe_gambar, tb_gambar.ukuran_gambar, (SELECT COUNT(*) FROM favorit WHERE id_gambar = tb_gambar.id) as fav_count FROM tb_gambar WHERE id = ?");
             $stmt->bind_param("i", $_POST['id']);
             $stmt->execute();
             $result = $stmt->get_result();
             $data = $result->fetch_assoc();
             $stmt->close();
-            if ($data) {
-                unset($data['gambar'], $data['nama_gambar'], $data['tipe_gambar'], $data['ukuran_gambar']);
-            }
             echo json_encode($data ?: ['error' => 'Gambar tidak ditemukan']);
             exit;
-    }
-} elseif ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])) {
-    switch ($_GET['action']) {
+
+        case 'get_my_images':
+            if (!isset($_SESSION['username'])) jsonError('Silakan login');
+            $stmt = $koneksi->prepare("SELECT * FROM tb_gambar WHERE username = ?");
+            $stmt->bind_param("s", $_SESSION['username']);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $images = [];
+            while ($row = $result->fetch_assoc()) { $images[] = $row; }
+            echo json_encode($images);
+            exit;
+
+        case 'get_favorites':
+            if (!isset($_SESSION['username'])) jsonError('Silakan login');
+            $stmt = $koneksi->prepare("SELECT g.id, g.judul, g.keterangan, f.id as favorite_id FROM tb_gambar g INNER JOIN favorit f ON g.id = f.id_gambar WHERE f.id_user = (SELECT id_user FROM admin WHERE username = ?)");
+            $stmt->bind_param("s", $_SESSION['username']);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $favs = [];
+            while ($row = $result->fetch_assoc()) { $favs[] = $row; }
+            echo json_encode($favs);
+            exit;
         case 'get_image_data':
             if (!isset($_GET['id'])) jsonError('ID gambar tidak ditemukan');
 
