@@ -148,7 +148,15 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
         }
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        main {
+            flex: 1;
+        }
         .masonry-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -277,18 +285,6 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
             ?>
         </div>
     </div>
-
-    <!-- Footer -->
-    <footer class="hidden md:block w-full border-t border-outline-variant/30 bg-surface-container-lowest mt-12">
-        <div class="px-4 md:px-margin-x max-w-container-max mx-auto py-8 flex justify-center items-center gap-6">
-            <p class="text-sm text-on-surface-variant">&copy; 2024 Lumina. All rights reserved.</p>
-            <div class="flex gap-4 text-sm text-on-surface-variant">
-                <a href="#" class="hover:text-primary transition-colors">Privacy</a>
-                <a href="#" class="hover:text-primary transition-colors">Terms</a>
-                <a href="#" class="hover:text-primary transition-colors">Contact</a>
-            </div>
-        </div>
-    </footer>
 
     <!-- Image Detail Section -->
     <div id="imageSection" class="hidden">
