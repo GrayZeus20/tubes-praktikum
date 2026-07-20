@@ -57,7 +57,7 @@ if ($username) {
     $stmt->close();
 }
 
-function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds = []) {
+function renderCards(mysqli_result $result, string $type = 'home', ?string $currentUser = null, array $favoritedIds = []) {
     if ($result->num_rows === 0) {
         $msg = $type === 'favorite' ? 'Tidak ada gambar favorit' : 'Gambar tidak ditemukan';
         echo "<div class='col-span-full text-center py-12'><p class='text-on-surface-variant text-lg'>$msg</p></div>";
@@ -71,7 +71,7 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
         $isFavorited = in_array($row['id'], $favoritedIds);
         $favIcon = $isFavorited ? 'favorite' : 'favorite';
         $favFill = $isFavorited ? "'FILL' 1" : "'FILL' 0";
-        $favColor = $isFavorited ? 'text-red-500' : 'text-white';
+        $favColor = $isFavorited ? 'text-red-500' : 'text-on-surface';
 
         echo "<div class='gallery-card-hover group relative bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0px_4px_20px_rgba(0,0,0,0.1)]'>
                 <div class='relative overflow-hidden aspect-[4/3]'>
@@ -96,7 +96,7 @@ function renderCards($result, $type = 'home', $currentUser = null, $favoritedIds
               </div>";
     }
 }
-function renderFavoriteCards($result) {
+function renderFavoriteCards(mysqli_result $result) {
     if ($result->num_rows === 0) {
         echo "<div class='col-span-full text-center py-12'><p class='text-on-surface-variant text-lg'>Tidak ada gambar favorit</p></div>";
         return;
@@ -179,6 +179,19 @@ function renderFavoriteCards($result) {
         }
         @media (min-width: 640px) {
             .favorites-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+        }
+
+/* Masonry Grid */
+        .masonry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 16px;
+        }
+        @media (min-width: 768px) {
+            .masonry-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+        }
+        @media (min-width: 1024px) {
+            .masonry-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
         }
         
         .gallery-card-hover:hover .card-overlay {
@@ -321,8 +334,8 @@ function renderFavoriteCards($result) {
         <div id="imageDetail" class="max-w-container-max mx-auto px-4 md:px-margin-x">
             <div class="content-wrapper">
                 <div class="image-col">
-                    <button onclick="showSection('homeSection')" class="inline-flex items-center gap-1 text-sm text-on-surface-variant hover:text-primary transition-colors mb-4">
-                        <span class="material-symbols-outlined text-lg">arrow_back</span> Back to gallery
+                    <button onclick="goBack()" class="inline-flex items-center gap-1 text-sm text-on-surface-variant hover:text-primary transition-colors mb-4">
+                        <span class="material-symbols-outlined text-lg">arrow_back</span> Back
                     </button>
                     <div id="detailImageWrap" class="aspect-[4/3] bg-surface-container rounded-xl overflow-hidden border border-outline-variant/50"></div>
                 </div>
@@ -539,8 +552,13 @@ function showToast(message, type) {
 }
 
 // Section navigation
+let lastSection = 'homeSection';
 function showSection(id) {
     var allSections = ['#homeSection', '#profileSection', '#favoriteSection', '#imageSection', '#newSection'];
+    var currentVisible = allSections.find(sel => !document.querySelector(sel).classList.contains('hidden'));
+    if (currentVisible && currentVisible.replace('#', '') !== 'imageSection' && id === 'imageSection') {
+        lastSection = currentVisible.replace('#', '');
+    }
     allSections.forEach(function(sel) {
         var el = document.querySelector(sel);
         if (!el) return;
@@ -550,6 +568,10 @@ function showSection(id) {
             el.classList.add('hidden');
         }
     });
+}
+
+function goBack() {
+    showSection(lastSection);
 }
 
 // Ensure homeSection is visible on every page load
