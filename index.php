@@ -73,15 +73,24 @@ function renderCards(mysqli_result $result, string $type = 'home', ?string $curr
         $favFill = $isFavorited ? "'FILL' 1" : "'FILL' 0";
         $favColor = $isFavorited ? 'text-red-500' : 'text-on-surface';
 
-        echo "<div class='gallery-card-hover group relative bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0px_4px_20px_rgba(0,0,0,0.1)]'>
-                    <div class='relative overflow-hidden aspect-[4/3]'>
-<img src='$imgSrc' class='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105' loading='lazy' onerror='this.src=\"placeholder.jpg\"'/>
-                        <div class='card-overlay absolute inset-0 bg-black/40 transition-opacity duration-300 flex flex-col justify-between p-4'>
-                        <div class='flex justify-end'>
+        $actionBtn = '';
+        if ($type === 'profile') {
+            $actionBtn = "<button class='delete-gambar-btn absolute top-4 right-4 w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-600 transition-colors' data-gambar-id='$id'>
+                            <span class='material-symbols-outlined text-[20px]'>delete</span>
+                          </button>";
+        } else {
+            $actionBtn = "<div class='flex justify-end'>
                             <button class='favorite-btn w-10 h-10 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-colors active:scale-90' data-id='$id'>
                                 <span class='material-symbols-outlined text-[20px] $favColor' style='font-variation-settings: $favFill'>favorite</span>
                             </button>
-                        </div>
+                        </div>";
+        }
+
+        echo "<div class='gallery-card-hover group relative bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0px_4px_20px_rgba(0,0,0,0.1)]'>
+                <div class='relative overflow-hidden aspect-[4/3]'>
+                    <img src='$imgSrc' class='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105' loading='lazy' onerror='this.src=\"placeholder.jpg\"'/>
+                    <div class='card-overlay absolute inset-0 bg-black/40 transition-opacity duration-300 flex flex-col justify-between p-4'>
+                        $actionBtn
                     </div>
                 </div>
                 <div class='p-4 flex flex-col gap-2'>
@@ -250,7 +259,7 @@ function renderFavoriteCards(mysqli_result $result) {
             <form action="index.php" method="get" class="relative hidden sm:block" role="search">
                 <label for="searchInput" class="sr-only">Search images</label>
                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg pointer-events-none" aria-hidden="true">search</span>
-                <input type="text" id="searchInput" name="cari" value="<?=htmlspecialchars($search)?>" placeholder="Search..." class="h-9 pl-9 pr-8 text-sm bg-surface-container-low border-none rounded-full focus:ring-2 focus:ring-primary/30 w-48 lg:w-64 transition-all"/>
+                <input type="text" id="searchInput" name="cari" value="<?=htmlspecialchars($search)?>" placeholder="Search..." autocomplete="off" class="h-9 pl-9 pr-8 text-sm bg-surface-container-low border-none rounded-full focus:ring-2 focus:ring-primary/30 w-48 lg:w-64 transition-all"/>
                 <?php if ($search): ?>
                     <a href="index.php" class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors">
                         <span class="material-symbols-outlined text-base">close</span>
