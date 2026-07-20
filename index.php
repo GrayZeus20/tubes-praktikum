@@ -74,9 +74,9 @@ function renderCards(mysqli_result $result, string $type = 'home', ?string $curr
         $favColor = $isFavorited ? 'text-red-500' : 'text-on-surface';
 
         echo "<div class='gallery-card-hover group relative bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0px_4px_20px_rgba(0,0,0,0.1)]'>
-                <div class='relative overflow-hidden aspect-[4/3]'>
-                    <img src='$imgSrc' class='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105' loading='lazy'/>
-                    <div class='card-overlay absolute inset-0 bg-black/20 transition-opacity duration-300 flex flex-col justify-between p-4'>
+                    <div class='relative overflow-hidden aspect-[4/3]'>
+                        <img src='$imgSrc' class='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105' loading='lazy' onerror="this.src='placeholder.jpg'"/>
+                        <div class='card-overlay absolute inset-0 bg-black/40 transition-opacity duration-300 flex flex-col justify-between p-4'>
                         <div class='flex justify-end'>
                             <button class='favorite-btn w-10 h-10 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-colors active:scale-90' data-id='$id'>
                                 <span class='material-symbols-outlined text-[20px] $favColor' style='font-variation-settings: $favFill'>favorite</span>
@@ -108,7 +108,7 @@ function renderFavoriteCards(mysqli_result $result) {
         
         echo "<div class='gallery-card-hover group relative bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0px_4px_20px_rgba(0,0,0,0.1)]'>
                 <div class='relative overflow-hidden aspect-[4/3]'>
-                    <img src='$imgSrc' class='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105' loading='lazy'/>
+                    <img src='$imgSrc' class='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105' loading='lazy' onerror="this.src='placeholder.jpg'"/>
                     <div class='card-overlay absolute inset-0 bg-black/40 transition-opacity duration-300 flex flex-col justify-between p-3'>
                         <div class='flex justify-end'>
                             <button class='delete-favorite-btn w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-600 transition-colors' data-favorite-id='" . ($row['favorite_id'] ?? '') . "'>
@@ -202,6 +202,12 @@ function renderFavoriteCards(mysqli_result $result) {
             opacity: 0;
             transition: opacity 0.3s ease;
         }
+        @media (max-width: 767px) {
+            .card-overlay {
+                opacity: 1;
+                background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%);
+            }
+        }
         .modal-backdrop { background: rgba(15,23,42,0.5); backdrop-filter: blur(4px); }
         .auth-card-blur { backdrop-filter: blur(16px); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -244,7 +250,12 @@ function renderFavoriteCards(mysqli_result $result) {
             <form action="index.php" method="get" class="relative hidden sm:block" role="search">
                 <label for="searchInput" class="sr-only">Search images</label>
                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg pointer-events-none" aria-hidden="true">search</span>
-                <input type="text" id="searchInput" name="cari" value="<?=htmlspecialchars($search)?>" placeholder="Search..." class="h-9 pl-9 pr-3 text-sm bg-surface-container-low border-none rounded-full focus:ring-2 focus:ring-primary/30 w-48 lg:w-64 transition-all"/>
+                <input type="text" id="searchInput" name="cari" value="<?=htmlspecialchars($search)?>" placeholder="Search..." class="h-9 pl-9 pr-8 text-sm bg-surface-container-low border-none rounded-full focus:ring-2 focus:ring-primary/30 w-48 lg:w-64 transition-all"/>
+                <?php if ($search): ?>
+                    <a href="index.php" class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-base">close</span>
+                    </a>
+                <?php endif; ?>
             </form>
             <?php if ($username): ?>
                 <button id="newLink" class="flex items-center justify-center w-9 h-9 rounded-full bg-primary text-white hover:opacity-90 transition-opacity">
@@ -266,12 +277,6 @@ function renderFavoriteCards(mysqli_result $result) {
     <!-- Home Section -->
     <div id="homeSection">
         <div class="masonry-grid"><?php renderCards($images, 'home', $username, $favoritedIds); ?></div>
-        <div id="loadingStatus" class="flex justify-center py-12">
-            <div class="flex flex-col items-center gap-2">
-                <div class="w-12 h-12 border-4 border-primary/10 border-t-primary rounded-full animate-spin"></div>
-                <p class="text-sm text-on-surface-variant font-medium">Memuat karya seni...</p>
-            </div>
-        </div>
     </div>
 
     <!-- Profile Section -->
@@ -382,7 +387,6 @@ function renderFavoriteCards(mysqli_result $result) {
 </main>
 
 <!-- Footer -->
-    <!-- Footer -->
     <footer class="hidden md:block w-full border-t border-outline-variant/30 bg-surface-container-lowest">
         <div class="px-4 md:px-margin-x max-w-container-max mx-auto py-8 flex justify-center items-center gap-6">
             <p class="text-sm text-on-surface-variant">&copy; 2024 Lumina. All rights reserved.</p>
@@ -529,6 +533,21 @@ function renderFavoriteCards(mysqli_result $result) {
     </div>
 </div>
 
+<!-- Confirm Modal -->
+<div id="confirmModal" class="fixed inset-0 z-[100] hidden">
+    <div class="modal-backdrop absolute inset-0" onclick="closeConfirm(false)"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="w-full max-w-sm bg-surface-container-lowest border border-outline-variant/50 rounded-xl shadow-xl p-6">
+            <h2 id="confirmTitle" class="text-lg font-bold mb-2">Konfirmasi</h2>
+            <p id="confirmMessage" class="text-sm text-on-surface-variant mb-6"></p>
+            <div class="flex gap-3">
+                <button type="button" class="flex-1 h-10 border border-outline-variant text-sm font-medium rounded-lg hover:bg-surface-container-low transition-colors" onclick="closeConfirm(false)">Batal</button>
+                <button type="button" id="confirmBtn" class="flex-1 h-10 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors">Ya, Hapus</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="toastContainer" class="fixed top-20 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
 <script>
@@ -550,6 +569,22 @@ function showToast(message, type) {
         }
     }, 3500);
 }
+
+let confirmResolve;
+function showConfirm(title, message, confirmText = 'Ya') {
+    document.getElementById('confirmTitle').innerText = title;
+    document.getElementById('confirmMessage').innerText = message;
+    document.getElementById('confirmBtn').innerText = confirmText;
+    document.getElementById('confirmModal').classList.remove('hidden');
+    return new Promise((resolve) => {
+        confirmResolve = resolve;
+    });
+}
+function closeConfirm(result) {
+    document.getElementById('confirmModal').classList.add('hidden');
+    if (confirmResolve) confirmResolve(result);
+}
+document.getElementById('confirmBtn').addEventListener('click', () => closeConfirm(true));
 
 // Section navigation
 let lastSection = 'homeSection';
@@ -684,9 +719,9 @@ document.getElementById('navProfile').addEventListener('click', function(e) {
     <?php if ($username): ?> navigateTo('profileSection', document.getElementById('profileLinkNav')); setActiveMobile(this);
     <?php else: ?> openModal('loginModal'); <?php endif; ?>
 });
-// Favorite toggle
+// Favorite toggle (Explore)
 document.addEventListener('click', function(e) {
-    var btn = e.target.closest('.favorite-btn');
+    var btn = e.target.closest('.favorite-btn, .favorite-detail-btn');
     if (!btn) return;
     var id = btn.getAttribute('data-id');
     fetch('api.php', {
@@ -697,18 +732,19 @@ document.addEventListener('click', function(e) {
     .then(function(r) { return r.json(); })
     .then(function(r) {
         if (r.status === 'success') {
-            var icon = btn.querySelector('.material-symbols-outlined');
-            var countEl = btn.querySelector('span:not(.material-symbols-outlined)');
-            if (r.action === 'added') {
-                icon.style.fontVariationSettings = "'FILL' 1";
-                icon.classList.add('text-red-500');
-                icon.classList.remove('text-white');
-                btn.classList.add('favorited');
-            } else {
-                icon.style.fontVariationSettings = "'FILL' 0";
-                icon.classList.remove('text-red-500');
-                icon.classList.add('text-white');
-                btn.classList.remove('favorited');
+            // Update icons if it's a card button
+            var cardBtn = document.querySelector('.favorite-btn[data-id="'+id+'"]');
+            if (cardBtn) {
+                var icon = cardBtn.querySelector('.material-symbols-outlined');
+                if (r.action === 'added') {
+                    icon.style.fontVariationSettings = "'FILL' 1";
+                    icon.classList.add('text-red-500');
+                    icon.classList.remove('text-on-surface');
+                } else {
+                    icon.style.fontVariationSettings = "'FILL' 0";
+                    icon.classList.remove('text-red-500');
+                    icon.classList.add('text-on-surface');
+                }
             }
         }
         showToast(r.message, r.status === 'success' ? 'success' : 'error');
@@ -717,10 +753,10 @@ document.addEventListener('click', function(e) {
 });
 
 // Delete gambar
-document.addEventListener('click', function(e) {
+document.addEventListener('click', async function(e) {
     var btn = e.target.closest('.delete-gambar-btn');
     if (!btn) return;
-    if (!confirm('Hapus gambar ini?')) return;
+    if (!(await showConfirm('Hapus Gambar?', 'Gambar ini akan dihapus permanen.'))) return;
     var id = btn.getAttribute('data-gambar-id');
     fetch('api.php', {
         method: 'POST',
@@ -736,10 +772,10 @@ document.addEventListener('click', function(e) {
 });
 
 // Delete favorite
-document.addEventListener('click', function(e) {
+document.addEventListener('click', async function(e) {
     var btn = e.target.closest('.delete-favorite-btn');
     if (!btn) return;
-    if (!confirm('Hapus dari favorit?')) return;
+    if (!(await showConfirm('Hapus Favorit?', 'Gambar ini akan dihapus dari favorit.'))) return;
     var id = btn.getAttribute('data-favorite-id');
     fetch('api.php', {
         method: 'POST',
@@ -749,7 +785,9 @@ document.addEventListener('click', function(e) {
     .then(function(r) { return r.json(); })
     .then(function(r) {
         showToast(r.message || (r.status === 'success' ? 'Favorit dihapus!' : 'Gagal menghapus'), r.status === 'success' ? 'success' : 'error');
-        if (r.status === 'success') setTimeout(function(){location.reload()}, 1500);
+        if (r.status === 'success') {
+            refreshSections();
+        }
     })
     .catch(function() { showToast('Terjadi kesalahan', 'error'); });
 });
@@ -864,8 +902,9 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
 });
 
 // Logout handler
-document.getElementById('logoutBtn')?.addEventListener('click', function() {
-    if (!confirm('Logout?')) return;
+document.getElementById('logoutBtn')?.addEventListener('click', async function(e) {
+    e.preventDefault();
+    if (!(await showConfirm('Logout?', 'Anda yakin ingin keluar dari akun?', 'Logout'))) return;
     fetch('auth.php?action=logout')
     .then(r => r.json())
     .then(r => {
@@ -901,7 +940,7 @@ function refreshSections() {
     
     fetch('render_cards.php?action=get_favorites_html')
         .then(r => r.text())
-        .then(html => { document.querySelector('#favoriteSection .masonry-grid').innerHTML = html; });
+        .then(html => { document.querySelector('#favoriteSection .favorites-grid').innerHTML = html; });
 }
 
 // Update nav clicks to trigger refresh
