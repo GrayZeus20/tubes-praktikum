@@ -75,7 +75,7 @@ function renderCards(mysqli_result $result, string $type = 'home', ?string $curr
 
         echo "<div class='gallery-card-hover group relative bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0px_4px_20px_rgba(0,0,0,0.1)]'>
                     <div class='relative overflow-hidden aspect-[4/3]'>
-                        <img src='$imgSrc' class='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105' loading='lazy' onerror="this.src='placeholder.jpg'"/>
+<img src='$imgSrc' class='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105' loading='lazy' onerror='this.src=\"placeholder.jpg\"'/>
                         <div class='card-overlay absolute inset-0 bg-black/40 transition-opacity duration-300 flex flex-col justify-between p-4'>
                         <div class='flex justify-end'>
                             <button class='favorite-btn w-10 h-10 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-colors active:scale-90' data-id='$id'>
@@ -108,7 +108,7 @@ function renderFavoriteCards(mysqli_result $result) {
         
         echo "<div class='gallery-card-hover group relative bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0px_4px_20px_rgba(0,0,0,0.1)]'>
                 <div class='relative overflow-hidden aspect-[4/3]'>
-                    <img src='$imgSrc' class='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105' loading='lazy' onerror="this.src='placeholder.jpg'"/>
+                    <img src='$imgSrc' class='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105' loading='lazy' onerror='this.src=\"placeholder.jpg\"'/>
                     <div class='card-overlay absolute inset-0 bg-black/40 transition-opacity duration-300 flex flex-col justify-between p-3'>
                         <div class='flex justify-end'>
                             <button class='delete-favorite-btn w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-600 transition-colors' data-favorite-id='" . ($row['favorite_id'] ?? '') . "'>
