@@ -111,11 +111,11 @@ function renderFavoriteCards($result) {
                     <img src='$imgSrc' class='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105' loading='lazy'/>
                     <div class='card-overlay absolute inset-0 bg-black/40 transition-opacity duration-300 flex flex-col justify-between p-3'>
                         <div class='flex justify-end'>
-                            <button class='delete-favorite-btn w-8 h-8 rounded-full bg-red-500/90 text-white flex items-center justify-center hover:bg-red-600 transition-colors' data-favorite-id='" . ($row['favorite_id'] ?? '') . "'>
+                            <button class='delete-favorite-btn w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-600 transition-colors' data-favorite-id='" . ($row['favorite_id'] ?? '') . "'>
                                 <span class='material-symbols-outlined text-[16px]'>delete</span>
                             </button>
                         </div>
-                        <button class='w-full py-1.5 bg-white/90 hover:bg-white text-primary text-[11px] font-bold rounded-lg transition-colors imageLink' data-id='$id'>View</button>
+                        <button class='w-full py-1.5 bg-primary text-white text-[11px] font-bold rounded-lg transition-colors hover:bg-primary/90 imageLink' data-id='$id'>View</button>
                     </div>
                 </div>
                 <div class='p-3'>
