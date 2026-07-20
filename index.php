@@ -69,8 +69,7 @@ function renderCards(mysqli_result $result, string $type = 'home', ?string $curr
         $owner = htmlspecialchars($row['username'] ?? '');
         $imgSrc = "img_view.php?id=$id";
         $isFavorited = in_array($row['id'], $favoritedIds);
-        $favIcon = $isFavorited ? 'favorite' : 'favorite';
-        $favFill = $isFavorited ? "'FILL' 1" : "'FILL' 0";
+        $favFill = $isFavorited ? "FILL 1" : "FILL 0";
         $favColor = $isFavorited ? 'text-red-500' : 'text-on-surface';
 
         $actionBtn = '';
@@ -86,9 +85,9 @@ function renderCards(mysqli_result $result, string $type = 'home', ?string $curr
                         </div>";
         }
 
-        echo "<div class='gallery-card-hover group relative bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0px_4px_20px_rgba(0,0,0,0.1)]'>
-                <div class='relative overflow-hidden aspect-[4/3]'>
-                    <img src='$imgSrc' class='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105' loading='lazy' onerror='this.src=\"placeholder.jpg\"'/>
+        echo "<div class='gallery-card-hover group relative bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0px_4px_20px_rgba(0,0,0,0.1)] masonry-item'>
+                <div class='relative overflow-hidden'>
+                    <img src='$imgSrc' class='w-full h-auto transition-transform duration-500 group-hover:scale-105' loading='lazy' onerror='this.src=\"placeholder.jpg\"'/>
                     <div class='card-overlay absolute inset-0 bg-black/40 transition-opacity duration-300 flex flex-col justify-between p-4'>
                         $actionBtn
                     </div>
@@ -115,9 +114,9 @@ function renderFavoriteCards(mysqli_result $result) {
         $judul = htmlspecialchars($row['judul'] ?? 'Untitled');
         $imgSrc = "img_view.php?id=$id";
         
-        echo "<div class='gallery-card-hover group relative bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0px_4px_20px_rgba(0,0,0,0.1)]'>
-                <div class='relative overflow-hidden aspect-[4/3]'>
-                    <img src='$imgSrc' class='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105' loading='lazy' onerror='this.src=\"placeholder.jpg\"'/>
+        echo "<div class='gallery-card-hover group relative bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0px_4px_20px_rgba(0,0,0,0.1)] masonry-item'>
+                <div class='relative overflow-hidden'>
+                    <img src='$imgSrc' class='w-full h-auto transition-transform duration-500 group-hover:scale-105' loading='lazy' onerror='this.src=\"placeholder.jpg\"'/>
                     <div class='card-overlay absolute inset-0 bg-black/40 transition-opacity duration-300 flex flex-col justify-between p-3'>
                         <div class='flex justify-end'>
                             <button class='delete-favorite-btn w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-600 transition-colors' data-favorite-id='" . ($row['favorite_id'] ?? '') . "'>
@@ -190,26 +189,28 @@ function renderFavoriteCards(mysqli_result $result) {
             .favorites-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
         }
 
-/* Masonry Grid */
-        .masonry-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 16px;
+/* Masonry/Column Grid - Menyesuaikan ukuran gambar */
+        .masonry-grid, .favorites-grid {
+            column-count: 2;
+            column-gap: 16px;
         }
-        @media (min-width: 768px) {
-            .masonry-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+        @media (min-width: 640px) {
+            .masonry-grid, .favorites-grid { column-count: 3; }
         }
         @media (min-width: 1024px) {
-            .masonry-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+            .masonry-grid, .favorites-grid { column-count: 4; }
+        }
+        .masonry-item {
+            break-inside: avoid;
+            margin-bottom: 16px;
         }
         
-        .gallery-card-hover:hover .card-overlay {
-            opacity: 1;
-        }
-
-        .card-overlay {
+        .gallery-card-hover .card-overlay {
             opacity: 0;
             transition: opacity 0.3s ease;
+        }
+        .gallery-card-hover:hover .card-overlay {
+            opacity: 1;
         }
         @media (max-width: 767px) {
             .card-overlay {
@@ -746,11 +747,11 @@ document.addEventListener('click', function(e) {
             if (cardBtn) {
                 var icon = cardBtn.querySelector('.material-symbols-outlined');
                 if (r.action === 'added') {
-                    icon.style.fontVariationSettings = "'FILL' 1";
+                    icon.style.setProperty('font-variation-settings', '"FILL" 1');
                     icon.classList.add('text-red-500');
                     icon.classList.remove('text-on-surface');
                 } else {
-                    icon.style.fontVariationSettings = "'FILL' 0";
+                    icon.style.setProperty('font-variation-settings', '"FILL" 0');
                     icon.classList.remove('text-red-500');
                     icon.classList.add('text-on-surface');
                 }
