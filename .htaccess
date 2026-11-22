@@ -1,0 +1,16 @@
+# Laragon project hardening — 2026-10-17 (audit keamanan wave 2).
+# Ekspos LAN: .git/config ke-serve HTTP 200 dari repo ini (tanpa isi sensitif,
+# tp tetap ditutup standar). Folder tugas; tidak ada .env.
+
+Options -Indexes
+
+<IfModule mod_authz_core.c>
+    <FilesMatch "^\.">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule "(^|/)\.(?!well-known)" - [F]
+</IfModule>
